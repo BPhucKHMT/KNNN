@@ -1,0 +1,5 @@
+#22/09/2005
+Cần fix:
+Prompt quá rộng , vd web ==> api k biết phải làm gì
+Prompt k liên quan ==> ngu luôn
+Link video youtube chi tiết thì khong coi đc (nghi vấn model ngu)
