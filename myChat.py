@@ -1,9 +1,3 @@
-import os
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from typing import List
-import json
-import re
 
 # API key Gemini
 myAPIKey = "AIzaSyAIn6B1I4U37iJ_YFJR3EWc-bkGUk__xuk"
