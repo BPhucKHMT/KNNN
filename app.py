@@ -3,6 +3,7 @@ from flask import Flask, json, request, jsonify
 from flask_cors import CORS
 import os
 from myChat import handle_query
+from db_storage import add_to_cache, search_similar
 
 import re
 
@@ -17,7 +18,16 @@ def query():
         return jsonify({"error": "Missing query parameter 'q'"}), 400
 
     try:
+        # Tìm kiếm trong cache trước
+        cached_query, cached_response, score = search_similar(user_query)
+        print("cached_reponse type", type(cached_response))
+        if cached_response:
+            return jsonify(cached_response)
+        # Nếu không tìm thấy trong cache, gọi myChat
         response = handle_query(user_query)
+        # Lưu vào cache
+        add_to_cache(user_query, response)
+        # Trả về response
         print(type(response))
         # Nếu đã là dict -> trả thẳng
         '''

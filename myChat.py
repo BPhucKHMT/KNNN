@@ -1,7 +1,10 @@
-
+import os
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.schema import HumanMessage, AIMessage, SystemMessage
+from dotenv import load_dotenv
 # API key Gemini
-myAPIKey = "AIzaSyAIn6B1I4U37iJ_YFJR3EWc-bkGUk__xuk"
-os.environ["GOOGLE_API_KEY"] = myAPIKey
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # JSON Schema cho structured output
 json_schema = {
@@ -73,7 +76,7 @@ class TechConsultant:
             max_output_tokens=None,
             timeout=None,
             max_retries=3,
-        ).with_structured_output(json_schema, method="json_schema")
+        ).with_structured_output(json_schema, method="json_mode")
         
         # System message chi tiết
         system_message = SystemMessage(content="""
@@ -85,6 +88,7 @@ NHIỆM VỤ:
 - So sánh chi tiết ưu/nhược điểm
 - Đưa ra lời khuyên cụ thể 
 -Các bước tiếp theo chỉ cần liệt kê (không cần các tiêu đề hãy gì hết)
+-Không được thiếu các trường trong JSON trả về
 -Ở comparison mỗi công cụ phải là một mục riêng biệt không được gộp lại so sánh chung
 -Không cần phải đánh dấu ** ** cho các tiêu đề
 - Cung cấp hướng dẫn bước đầu
@@ -124,12 +128,7 @@ Trả lời bằng tiếng Việt, thân thiện và chuyên nghiệp.
         enhanced_question = f"""
 Câu hỏi: {question}
 
-Vui lòng phân tích và đề xuất công cụ phù hợp. Nếu thông tin chưa đủ, hãy hỏi thêm về:
-- Loại dự án/công việc cụ thể
-- Ngân sách dự kiến  
-- Trình độ kỹ thuật hiện tại
-- Quy mô team/dự án
-- Timeline thực hiện
+
 """
         
         self.messages.append(HumanMessage(content=enhanced_question))
