@@ -1,4 +1,4 @@
-#22/09/2005
+#22/09/2025
 Cần fix:
 Prompt quá rộng , vd web ==> api k biết phải làm gì
 Prompt k liên quan ==> ngu luôn

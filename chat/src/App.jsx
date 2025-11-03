@@ -1,21 +1,21 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import AppRoutes from './routes/AppRoutes'
-import 'bootstrap/dist/css/bootstrap.min.css';
+// Component gốc của ứng dụng
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import IntroPage from './pages/IntroPage.jsx';
+import ChatPage from './pages/ChatPage.jsx';
 
-import {
-  BrowserRouter as Router,
-} from "react-router-dom";
-function App() {
-  const [count, setCount] = useState(0)
-
+// Định nghĩa các route cho ứng dụng
+export default function App() { 
   return (
-    <Router>
-      <AppRoutes />
-    </Router>
-  )
+    <BrowserRouter>
+      <Routes>
+        {/* Trang giới thiệu */}
+        <Route path="/" element={<IntroPage />} />
+        {/* Trang Chat */}
+        <Route path="/chat" element={<ChatPage />} />
+        {/* Redirect các route không tồn tại về trang chủ */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App

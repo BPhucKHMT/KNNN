@@ -4,7 +4,7 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.prompts import ChatPromptTemplate
 from dotenv import load_dotenv
 
-myAPIKey = "AIzaSyAIn6B1I4U37iJ_YFJR3EWc-bkGUk__xuk"
+myAPIKey = "AIzaSyDQPqLlza0wWw7NGLwPvQ2Xwe3TGeUynm0"
 # API key Gemini
 os.environ["GOOGLE_API_KEY"] = myAPIKey
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage

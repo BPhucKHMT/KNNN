@@ -168,7 +168,6 @@ Câu hỏi: {question}
                             "final_recommendation": ["Vui lòng thử lại hoặc đặt câu hỏi khác."],
                             "next_steps": ["Kiểm tra kết nối mạng", "Thử lại sau 5 phút", "Liên hệ hỗ trợ nếu lỗi tiếp tục"]
                         }
-
             
             self.messages.append(AIMessage(content=f"Đã xảy ra lỗi: {str(e)[:50]}..."))
             return fallback_response
@@ -253,9 +252,6 @@ SAMPLE_QUESTIONS = {
     "data_analysis": "Phân tích dữ liệu bán hàng cho shop online nhỏ"
 }
 
-
-        
-  
 def handle_query(query):
     """Hàm tiện lợi để xử lý query và trả về dict"""
     try:
