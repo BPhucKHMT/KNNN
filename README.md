@@ -1,38 +1,45 @@
 # Kĩ năng nghề nghiệp
 ## Feedback
-- Góp ý về IntroPage
-
+- Góp ý về trang Intro
+- Góp ý về trang About
+- Góp ý về trang Support
+- Góp ý về trang Chat
+- Bug report
 ## Frontend (React + Vite + Tailwind CSS)
 ### Cấu trúc FE
 ```bash
 frontend/
 ├── src/
-│   ├── components/             # Các component sử dụng
-│   │   ├── ChatMessage.jsx     # Tin nhắn chat (user/bot)
-│   │   ├── MessageInput.jsx    # Ô nhập tin nhắn
-│   │   ├── Modal.jsx           # Popup chi tiết công cụ
-│   │   └── SuggestionCard.jsx  # Card gợi ý công cụ
+│   ├── components/                     # Các component dùng chung
+│   │   ├── ChatMessage.jsx             # Hiển thị bong bóng chat (user/bot)
+│   │   ├── Header.jsx                  # Header chung cho Intro + About + Support
+│   │   ├── MessageInput.jsx            # Ô nhập tin nhắn + nút gửi
+│   │   ├── Modal.jsx                   # Popup chi tiết công cụ
+│   │   └── SuggestionCard.jsx          # Card gợi ý công cụ
 │   │
-│   ├── pages/                  # Các trang chính
-│   │   ├── IntroPage.jsx       # Trang giới thiệu/landing
-│   │   └── ChatPage.jsx        # Trang chat AI
+│   ├── pages/                          # Các trang chính của ứng dụng
+│   │   ├── IntroPage.jsx               # Trang bắt đầu
+│   │   ├── ChatPage.jsx                # Trang chatbot AI (logic chính)
+│   │   ├── AboutPage.jsx               # Trang giới thiệu
+│   │   └── SupportPage.jsx             # Trang hỗ trợ người dùng
 │   │
-│   ├── lib/                    # Utilities
-│   │   └── api.js              # API gọi đến backend
+│   ├── lib/
+│   │   └── api.js                      # Hàm gọi API tới backend
 │   │
-│   ├── assets/                 # Hình ảnh, icons
-│   │   ├── logo.png
-│   │   └── robot-hands.png
+│   ├── services/
+│   │   └── suggest.js                  # Service xử lý gợi ý từ backend
 │   │
-│   ├── App.jsx                 # Root component với routing
-│   ├── main.jsx                # Entry point
-│   ├── styles.css              # Global styles + Tailwind
-│   └── services
-│       └── suggest.js          # Gọi API lấy gợi ý từ backend
+│   ├── assets/                         # Hình ảnh, logo
+│   │   └── .png
+│   │
+│   ├── App.jsx                         # Root component quản lý routes
+│   ├── main.jsx                        # Entry point cho Vite
+│   └── styles.css                      # Global styles + Tailwind
 │
-├── postcss.config.js           # PostCSS config
-├── tailwind.config.js          # Tailwind config        
-└── vite.config.js              # Vite build config
+├── postcss.config.js                   # PostCSS config
+├── tailwind.config.js                  # Tailwind config    
+└── vite.config.js                      # Vite build config
+
 ```
 ### Chạy FE
 ```bash
