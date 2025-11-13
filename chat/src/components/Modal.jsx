@@ -1,7 +1,9 @@
 // Component popup modal hiển thị chi tiết công cụ
 import React, { useEffect, useRef } from 'react';
+import { X } from "lucide-react";
 
-export default function Modal({ open, title, children, link, onClose }) {
+
+export default function Modal({ open, title, iconUrl, children, link, onClose }) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -31,18 +33,33 @@ export default function Modal({ open, title, children, link, onClose }) {
       >
         {/* Header cố định */}
         <div className="flex-shrink-0 px-5 pt-5 pb-3 border-b border-white/10">
+          {/* Button đóng modal */}
           <button
             onClick={onClose}
             aria-label="Đóng"
             className="absolute top-3 right-3 w-8 h-8 rounded-full
-                       bg-white/10 hover:bg-white/20 border border-white/10
-                       text-gray-200 transition"
+                      bg-white/10 hover:bg-white/20 border border-white/10
+                      flex items-center justify-center
+                      will-change-transform 
+                      transition duration-300 hover:scale-110"
             title="Đóng"
           >
-            ✕
+            <X className="w-5 h-5 text-white" />
           </button>
 
-          <h3 className="text-lg font-semibold text-white pr-8">{title}</h3>
+          {/* Tên công cụ + logo */}
+          <h3 className="text-lg font-semibold text-white pr-8 flex items-center gap-3">
+            <span className="truncate">{title}</span>
+            {iconUrl && (
+              <img
+                src={iconUrl}
+                alt=""
+                className="w-7 h-7 rounded-md flex-shrink-0"
+                loading="lazy"
+              />
+            )}
+          </h3>
+
         </div>
 
         {/* Nội dung */}

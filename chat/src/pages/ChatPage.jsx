@@ -1,44 +1,50 @@
 // Trang Chat
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import ChatMessage from "../components/ChatMessage.jsx";
-import MessageInput from "../components/MessageInput.jsx";
-import Modal from "../components/Modal.jsx";
-import SuggestionCard from "../components/SuggestionCard.jsx";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, Plus} from "lucide-react";
 import { askTools } from "../lib/api.js";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
+import ChatMessage from "../components/ChatMessage.jsx";
+import MessageInput from "../components/MessageInput.jsx";
+import Modal from "../components/Modal.jsx";
+import SuggestionCard from "../components/SuggestionCard.jsx";
+
 const LS_KEY = "chat_messages_v1";
 
 /* Header */
-function Header({ onBackToIntro, onReset }) {
+function Header({ onBackToIntro, onReset, onScrollToBottom }) {
   return (
     <header className="sticky top-0 z-20">
       <div className="max-w-screen-2xl mx-auto px-5 sm:px-8 py-5">
         <div className="relative flex items-center justify-center rounded-2xl border border-white/10 bg-black/20 backdrop-blur-xl px-5 py-3">
-          
+
           {/* Nút Back */}
           <button
             onClick={onBackToIntro}
-            className="absolute left-5 text-sm font-semibold text-white hover:text-pink-400 transition"
+            className="absolute left-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur flex items-center justify-center transition-all duration-300 hover:scale-110"
             title="Trở về trang giới thiệu"
           >
-            ← QUAY LẠI
+            <ChevronLeft className="w-5 h-5 text-white" />
           </button>
 
-          {/* Tiêu đề ở giữa */}
-          <span className="font-semibold tracking-wide text-white text-center">
+          <span
+            onClick={onScrollToBottom}
+            className="font-semibold tracking-wide text-white text-center cursor-pointer hover:text-pink-400 transition"
+            title="Cuộn xuống cuối đoạn chat"
+          >
             ChatBot AI gợi ý công cụ học tập
           </span>
 
           {/* Nút Reset */}
           <button
             onClick={onReset}
-            className="absolute right-5 text-sm font-semibold text-white hover:text-pink-400 transition"
+            className="absolute right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur flex items-center justify-center transition-all duration-300 hover:scale-110"
             title="Tạo cuộc hội thoại mới"
           >
-            CHAT MỚI +
+            <Plus className="w-5 h-5 text-white" />
           </button>
+
         </div>
       </div>
     </header>
@@ -98,10 +104,11 @@ export default function ChatPage() {
   const hasMessages = useMemo(() => messages.length > 0, [messages]);
 
   // Cuộn xuống cuối vùng chat
-  function scrollToBottom() {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  function scrollToBottom(behavior = "smooth") {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior,
+    });
   }
 
   // Lưu messages vào localStorage
@@ -111,15 +118,12 @@ export default function ChatPage() {
 
   // Cuộn xuống dưới cùng khi mới vào trang
   useEffect(() => {
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-    }, 100);
-    return () => clearTimeout(timer);
+    scrollToBottom("smooth");
   }, []);
 
   // Auto-scroll khi có tin nhắn mới hoặc đang loading
-  useLayoutEffect(() => {
-    scrollToBottom();
+  useEffect(() => {
+    scrollToBottom("smooth");
   }, [messages, loading]);
 
   function handleReset() {
@@ -132,42 +136,50 @@ export default function ChatPage() {
     } catch {
       /* noop */
     }
-    // Cuộn về cuối
-    requestAnimationFrame(scrollToBottom);
+    // Cuộn về cuối (lúc này gần như top container)
+    requestAnimationFrame(() => scrollToBottom("auto"));
   }
 
   /* Map dữ liệu tool từ backend */
   function mapToolsForUI(tools = []) {
-    return tools.slice(0, 3).map((t) => ({
-      title: t?.name || "Công cụ",
-      summary:
-        t?.description ||
-        (Array.isArray(t?.advantages)
-          ? t.advantages.join(" · ")
-          : "Gợi ý công cụ phù hợp"),
-      link: t?.url || null,    
-      details: [
-        t?.category ? `• Nhóm: ${t.category}` : null,
-        t?.pricing ? `• Chi phí: ${t.pricing}` : null,
-        t?.setup_time ? `• Thời gian thiết lập: ${t.setup_time}` : null,
-        t?.difficulty_level ? `• Độ khó: ${t.difficulty_level}` : null,
-        Array.isArray(t?.advantages) && t.advantages.length
-          ? `✓ Ưu điểm:\n- ${t.advantages.join("\n- ")}`
-          : null,
-        Array.isArray(t?.disadvantages) && t.disadvantages.length
-          ? `✗ Nhược điểm:\n- ${t.disadvantages.join("\n- ")}`
-          : null,
-        Array.isArray(t?.quick_guide) && t.quick_guide.length
-          ? `Bắt đầu nhanh:\n${t.quick_guide
-              .map((s, i) => `${i + 1}. ${s}`)
-              .join("\n")}`
-          : null,
-        t?.best_for ? `Phù hợp nhất cho: ${t.best_for}` : null,
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
-    }));
+    return tools.slice(0, 3).map((t) => {
+      const advantages = Array.isArray(t?.advantages) ? t.advantages : [];
+      const disadvantages = Array.isArray(t?.disadvantages) ? t.disadvantages : [];
+      const quickGuide = Array.isArray(t?.quick_guide) ? t.quick_guide : [];
+
+      const favicon = t?.url
+        ? `https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(
+            t.url
+          )}&size=64`
+        : null;
+
+      return {
+        title: t?.name || "Công cụ",
+        summary:
+          t?.description ||
+          (advantages.length ? advantages.join(" · ") : "Gợi ý công cụ phù hợp"),
+
+        link: t?.url || null,
+        favicon,
+
+        // Chuyển thành chuỗi chi tiết
+        details: {
+          overview: [
+            t?.category && `- Nhóm: ${t.category}`,
+            t?.pricing && `- Chi phí: ${t.pricing}`,
+            t?.setup_time && `- Thời gian thiết lập: ${t.setup_time}`,
+            t?.difficulty_level && `- Độ khó: ${t.difficulty_level}`,
+          ].filter(Boolean),
+
+          advantages: advantages.length ? advantages : null,
+          disadvantages: disadvantages.length ? disadvantages : null,
+          quickGuide: quickGuide.length ? quickGuide : null,
+          bestFor: t?.best_for || null,
+        },
+      };
+    });
   }
+
 
   /* Gửi câu hỏi, gọi BE và render */
   function addUserMessage(text) {
@@ -175,7 +187,7 @@ export default function ChatPage() {
 
     // Thêm tin nhắn user và cuộn ngay
     setMessages((prev) => [...prev, { role: "user", content: text.trim() }]);
-    requestAnimationFrame(scrollToBottom);
+    requestAnimationFrame(() => scrollToBottom("smooth"));
 
     // Gọi backend
     setErrorText("");
@@ -241,7 +253,7 @@ export default function ChatPage() {
         ]);
 
         // Cuộn sau khi nhận phản hồi từ chatbot
-        requestAnimationFrame(scrollToBottom);
+        requestAnimationFrame(() => scrollToBottom("smooth"));
       })
       .catch((err) => {
         setErrorText(err?.message || "Không thể gọi API.");
@@ -253,7 +265,7 @@ export default function ChatPage() {
               "Xin lỗi, hiện không thể lấy gợi ý từ máy chủ. Hãy thử lại sau.",
           },
         ]);
-        requestAnimationFrame(scrollToBottom);
+        requestAnimationFrame(() => scrollToBottom("smooth"));
       })
       .finally(() => setLoading(false));
   }
@@ -270,7 +282,11 @@ export default function ChatPage() {
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(120%_120%_at_100%_0%,rgba(124,58,237,0.12)_0%,transparent_55%)]"
       />
 
-      <Header onBackToIntro={() => navigate('/')} onReset={handleReset} />
+      <Header
+        onBackToIntro={() => navigate('/')}
+        onReset={handleReset}
+        onScrollToBottom={() => scrollToBottom("smooth")}
+      />
 
       {/* Khung chính căn giữa */}
       <motion.main
@@ -307,6 +323,7 @@ export default function ChatPage() {
                           key={i}
                           title={s.title}
                           summary={s.summary}
+                          iconUrl={s.favicon} 
                           onOpen={() => setActiveSuggestion(s)}
                         />
                       ))}
@@ -323,7 +340,16 @@ export default function ChatPage() {
 
             {loading && (
               <ChatMessage role="assistant">
-                Đang tìm công cụ phù hợp cho bạn…
+                <div className="flex items-center space-x-3">
+                  <span className="text-xs text-gray-400">
+                    Đang tìm công cụ phù hợp cho bạn
+                  </span>
+                  <div className="flex items-end space-x-1">
+                    <span className="w-2 h-2 rounded-full bg-gray-300/80 animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-2 h-2 rounded-full bg-gray-300/80 animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-2 h-2 rounded-full bg-gray-300/80 animate-bounce" />
+                  </div>
+                </div>
               </ChatMessage>
             )}
 
@@ -350,11 +376,75 @@ export default function ChatPage() {
       <Modal
         open={!!activeSuggestion}
         title={activeSuggestion?.title}
+        iconUrl={activeSuggestion?.favicon} 
         link={activeSuggestion?.link}
         onClose={() => setActiveSuggestion(null)}
       >
-        <div className="whitespace-pre-wrap text-sm leading-relaxed">
-          {activeSuggestion?.details}
+        <div className="space-y-6 text-sm leading-relaxed">
+
+          {/* Giới thiệu */}
+          {activeSuggestion?.summary && (
+            <section>
+              <h4 className="font-semibold text-white mb-1">Giới thiệu:</h4>
+              <p className="text-gray-200">{activeSuggestion.summary}</p>
+            </section>
+          )}
+
+          {/* Chi tiết */}
+          <section>
+            <h4 className="font-semibold text-white mb-1">Chi tiết:</h4>
+
+            {/* Nhóm / Chi phí / Thời gian / Độ khó */}
+            <div className="space-y-1 text-gray-300">
+              {activeSuggestion?.details?.overview?.map((line, i) => (
+                <div key={i}>{line}</div>
+              ))}
+            </div>
+
+            {/* Ưu điểm */}
+            {activeSuggestion?.details?.advantages && (
+              <div className="mt-4">
+                <h4 className="font-semibold text-white">✓ Ưu điểm:</h4>
+                <ul className="list-disc ml-5 text-gray-300 mt-1">
+                  {activeSuggestion.details.advantages.map((adv, i) => (
+                    <li key={i}>{adv}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Nhược điểm */}
+            {activeSuggestion?.details?.disadvantages && (
+              <div className="mt-4">
+                <h4 className="font-semibold text-white">✗ Nhược điểm:</h4>
+                <ul className="list-disc ml-5 text-gray-300 mt-1">
+                  {activeSuggestion.details.disadvantages.map((dis, i) => (
+                    <li key={i}>{dis}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Hướng dẫn nhanh */}
+            {activeSuggestion?.details?.quickGuide && (
+              <div className="mt-4">
+                <h4 className="font-semibold text-white">Hướng dẫn nhanh:</h4>
+                <ol className="list-decimal ml-5 text-gray-300 mt-1">
+                  {activeSuggestion.details.quickGuide.map((step, i) => (
+                    <li key={i}>{step}</li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {/* Phù hợp nhất cho */}
+            {activeSuggestion?.details?.bestFor && (
+              <div className="mt-4">
+                <h4 className="font-semibold text-white">Phù hợp nhất cho:</h4>
+                <p className="text-gray-300 mt-1">{activeSuggestion.details.bestFor}</p>
+              </div>
+            )}
+          </section>
         </div>
       </Modal>
     </div>
