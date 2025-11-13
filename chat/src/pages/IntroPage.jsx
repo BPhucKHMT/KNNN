@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/Header.jsx";
-import robotImg from "../assets/robot-hands.png";
+import robotImg from "../assets/Background/robot-hands.png";
 
 export default function IntroPage() {
   const navigate = useNavigate();

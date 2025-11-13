@@ -4,23 +4,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "../components/Header.jsx";
 
 // Import ảnh
-import anh1 from "../assets/anh1.png";
-import anh2 from "../assets/anh2.png";
-import anh3 from "../assets/anh3.png";
-import anh4 from "../assets/anh4.png";
-import anh5 from "../assets/anh5.png";
-import anh6 from "../assets/anh6.png";
-import anh7 from "../assets/anh7.png";
-import anh8 from "../assets/anh8.png";
-import anh9 from "../assets/anh9.png";
-import anh10 from "../assets/anh10.png";
+import anh1 from "../assets/Avatar/anh1.png";
+import anh2 from "../assets/Avatar/anh2.png";
+import anh3 from "../assets/Avatar/anh3.png";
+import anh4 from "../assets/Avatar/anh4.png";
+import anh5 from "../assets/Avatar/anh5.png";
+import anh6 from "../assets/Avatar/anh6.png";
+import anh7 from "../assets/Avatar/anh7.png";
+import anh8 from "../assets/Avatar/anh8.png";
+import anh9 from "../assets/Avatar/anh9.png";
+import anh10 from "../assets/Avatar/anh10.png";
 
 // Dữ liệu các ban và thành viên
 const teams = [
   {
     name: "Ban Truyền Thông",
     members: [
-      { id: 1, name: "Nguyễn Phương Quyên", mssv: "23521327", avatar: anh1 },
+      { id: 1, name: "Nguyễn Phương Quyên", mssv: "23521327", avatar: anh8 },
       { id: 2, name: "Đoàn An Minh", mssv: "23520921", avatar: anh2 },
       { id: 3, name: "Nguyễn Đức Duy", mssv: "24520386", avatar: anh3 },
       { id: 4, name: "Chu Thị Minh Ánh", mssv: "24520088", avatar: anh4 },
@@ -30,9 +30,9 @@ const teams = [
   {
     name: "Ban Thiết Kế",
     members: [
-      { id: 1, name: "Nguyễn Phương Quyên", mssv: "23521327", avatar: anh1 },
+      { id: 1, name: "Nguyễn Phương Quyên", mssv: "23521327", avatar: anh8 },
       { id: 2, name: "Trần Nguyễn Việt Hoàng", mssv: "23520541", avatar: anh5 },
-      { id: 3, name: "Dương Thị Tú Yến", mssv: "23521846", avatar: anh7 },
+      { id: 3, name: "Dương Thị Tú Yến", mssv: "23521846", avatar: anh1 },
       { id: 4, name: "Chu Thị Minh Ánh", mssv: "24520088", avatar: anh4 },
     ],
   },
@@ -40,8 +40,8 @@ const teams = [
     name: "Ban Code Web",
     members: [
       { id: 1, name: "Trần Nguyễn Việt Hoàng", mssv: "23520541", avatar: anh5 },
-      { id: 2, name: "Dương Thị Tú Yến", mssv: "23521846", avatar: anh7 },
-      { id: 3, name: "Nguyễn Lâm Bảo Phúc", mssv: "23521208", avatar: anh8 },
+      { id: 2, name: "Dương Thị Tú Yến", mssv: "23521846", avatar: anh1 },
+      { id: 3, name: "Nguyễn Lâm Bảo Phúc", mssv: "23521208", avatar: anh7 },
     ],
   },
   {
@@ -63,13 +63,13 @@ const teams = [
     name: "Ban Thuyết Trình",
     members: [
       { id: 1, name: "Hồ Nhật Thành", mssv: "23521439", avatar: anh10 },
-      { id: 2, name: "Nguyễn Lâm Bảo Phúc", mssv: "23521208", avatar: anh8 },
+      { id: 2, name: "Nguyễn Lâm Bảo Phúc", mssv: "23521208", avatar: anh7 },
       { id: 3, name: "Nguyễn Đức Duy", mssv: "24520386", avatar: anh3 },
     ],
   },
 ];
 
-export default function AboutUsPage() {
+export default function AboutPage() {
   const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
   const [direction, setDirection] = useState(0);
 
@@ -126,7 +126,7 @@ export default function AboutUsPage() {
             className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#0f1218]/90 backdrop-blur shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)]"
           >
             {/* Gradient background bên trong card */}
-            <div className="relative p-4 sm:p-10 bg-[radial-gradient(80%_70%_at_100%_0%,rgba(236,72,153,0.6)_0%,rgba(236,72,153,0.15)_35%,transparent_50%)]">
+            <div className="relative p-4 sm:p-10 bg-[radial-gradient(80%_70%_at_0%_0%,rgba(236,72,153,0.6)_0%,rgba(236,72,153,0.15)_35%,transparent_50%)]">
               {/* Title */}
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
@@ -150,7 +150,7 @@ export default function AboutUsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   transition={{ duration: 0.3 }}
-                  className="text-xl md:text-4xl font-semibold text-center text-white mb-8"
+                  className="text-xl md:text-4xl font-semibold text-center text-pink-400 mb-8"
                 >
                   {currentTeam.name}
                 </motion.h2>
@@ -190,7 +190,7 @@ export default function AboutUsPage() {
                         >
                           {/* Avatar */}
                           <div className="relative mb-4">
-                            <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white/10 group-hover:border-pink-400 transition-all duration-300 shadow-lg group-hover:shadow-pink-500/50">
+                            <div className="w-32 h-32 md:w-36 md:h-36 rounded-full overflow-hidden border-4 border-white/10 group-hover:border-pink-400 transition-all duration-300 shadow-lg group-hover:shadow-pink-500/50">
                               <img
                                 src={member.avatar}
                                 alt={member.name}
@@ -207,7 +207,7 @@ export default function AboutUsPage() {
                           </h3>
 
                           {/* MSSV */}
-                          <p className="text-m font-semibold text-pink-400">
+                          <p className="text-base font-semibold text-pink-400">
                             {member.mssv}
                           </p>
                         </motion.button>

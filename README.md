@@ -1,4 +1,6 @@
 # Kĩ năng nghề nghiệp
+## Feedback
+- Góp ý về IntroPage
 
 ## Frontend (React + Vite + Tailwind CSS)
 ### Cấu trúc FE
