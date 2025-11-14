@@ -6,8 +6,9 @@ import { useNavigate } from "react-router-dom";
 
 import ChatMessage from "../components/ChatMessage.jsx";
 import MessageInput from "../components/MessageInput.jsx";
-import Modal from "../components/Modal.jsx";
 import SuggestionCard from "../components/SuggestionCard.jsx";
+import ComparisonTable from "../components/ComparisonTable.jsx";
+import Modal from "../components/Modal.jsx";
 
 const LS_KEY = "chat_messages_v1";
 
@@ -270,7 +271,9 @@ export default function ChatPage() {
           });
           extra.push({
             role: "assistant",
-            content: data.comparison.map((x) => `• ${x}`).join("\n"),
+            type: "comparisonTable",
+            tools: mapped,
+            comparisons: data.comparison,
           });
         }
 
@@ -431,6 +434,21 @@ export default function ChatPage() {
                     </>
                   );
                 }
+                
+                // Bảng so sánh
+                if (m.type === "comparisonTable") {
+                  return (
+                    <>
+                      {dateSeparator}
+                      <div className="w-full my-3">
+                        <ComparisonTable 
+                          tools={m.tools || []} 
+                          comparisonTexts={m.comparisons || []} 
+                        />
+                      </div>
+                    </>
+                  );
+                }
 
                 // Tin nhắn bình thường (user / assistant)
                 return (
@@ -497,7 +515,7 @@ export default function ChatPage() {
           {activeSuggestion?.summary && (
             <section>
               <h4 className="font-semibold text-white mb-1">Giới thiệu:</h4>
-              <p className="text-gray-200">{activeSuggestion.summary}</p>
+              <p className="text-gray-300">{activeSuggestion.summary}</p>
             </section>
           )}
 

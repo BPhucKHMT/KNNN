@@ -47,6 +47,7 @@ frontend/
 - Cài đặt nodejs và npm
 - Cài đặt thư viện react cho fe
 ```bash
+npm install
 npm install lucide-react
 npm install framer-motion
 npm install react-router-dom
@@ -54,7 +55,6 @@ npm install react-router-dom
 - Chạy giao diện fe
 ```bash
 cd chat
-npm install
 npm run dev
 ```
 ## Backend (Flask + FAISS + Google Gemini)
