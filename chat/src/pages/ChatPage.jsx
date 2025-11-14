@@ -84,6 +84,16 @@ function Welcome({ onExampleClick }) {
   );
 }
 
+/* Lấy ngày hiện tại định dạng dd/mm/yyyy */
+function getTodayLabel() {
+  return new Date().toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+
 /* Trang chat chính */
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -185,8 +195,23 @@ export default function ChatPage() {
   function addUserMessage(text) {
     if (!text || !text.trim()) return;
 
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const dateStr = getTodayLabel();
+
     // Thêm tin nhắn user và cuộn ngay
-    setMessages((prev) => [...prev, { role: "user", content: text.trim() }]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: text.trim(),
+        time: timeStr,
+        date: dateStr,
+      },
+    ]);
     requestAnimationFrame(() => scrollToBottom("smooth"));
 
     // Gọi backend
@@ -246,10 +271,16 @@ export default function ChatPage() {
           {
             role: "assistant",
             type: "preface",
-            content: "Dưới đây là 3 công cụ phù hợp nhất cho nhu cầu của bạn:",
+            content: "Dưới đây là những công cụ phù hợp nhất cho nhu cầu của bạn:",
+            date: dateStr,
           },
-          { role: "assistant", type: "suggestionRow", payload: mapped },
-          ...extra,
+          { 
+            role: "assistant", 
+            type: "suggestionRow", 
+            payload: mapped,
+            date: dateStr,
+          },
+          ...extra.map((m) => ({ ...m, date: dateStr })),
         ]);
 
         // Cuộn sau khi nhận phản hồi từ chatbot
@@ -305,38 +336,70 @@ export default function ChatPage() {
               </div>
             )}
 
-            {messages.map((m, idx) => {
-              if (m.type === "preface") {
+            {(() => {
+              let lastDate = null;
+
+              return messages.map((m, idx) => {
+                const showDate = m.date && m.date !== lastDate;
+                if (showDate) lastDate = m.date;
+
+                // Thanh ngày tháng năm
+                const dateSeparator = showDate ? (
+                  <div key={`date-${idx}`} className="flex items-center my-4">
+                    <div className="flex-grow border-t border-white/10" />
+                    <span className="mx-3 text-xs text-gray-400 whitespace-nowrap">
+                      {m.date}
+                    </span>
+                    <div className="flex-grow border-t border-white/10" />
+                  </div>
+                ) : null;
+
+                // Tin nhắn preface
+                if (m.type === "preface") {
+                  return (
+                    <>
+                      {dateSeparator}
+                      <ChatMessage role="assistant">
+                        {m.content}
+                      </ChatMessage>
+                    </>
+                  );
+                }
+
+                // Hàng suggestion
+                if (m.type === "suggestionRow") {
+                  const items = m.payload || [];
+                  return (
+                    <>
+                      {dateSeparator}
+                      <div className="w-full my-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {items.map((s, i) => (
+                            <SuggestionCard
+                              key={i}
+                              title={s.title}
+                              summary={s.summary}
+                              iconUrl={s.favicon}
+                              onOpen={() => setActiveSuggestion(s)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  );
+                }
+
+                // Tin nhắn bình thường (user / assistant)
                 return (
-                  <ChatMessage key={idx} role="assistant">
+                <>
+                  {dateSeparator}
+                  <ChatMessage role={m.role} time={m.time}>
                     {m.content}
                   </ChatMessage>
-                );
-              }
-              if (m.type === "suggestionRow") {
-                const items = m.payload || [];
-                return (
-                  <div key={idx} className="w-full my-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {items.map((s, i) => (
-                        <SuggestionCard
-                          key={i}
-                          title={s.title}
-                          summary={s.summary}
-                          iconUrl={s.favicon} 
-                          onOpen={() => setActiveSuggestion(s)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                );
-              }
-              return (
-                <ChatMessage key={idx} role={m.role}>
-                  {m.content}
-                </ChatMessage>
+                </>
               );
-            })}
+              });
+            })()}
 
             {loading && (
               <ChatMessage role="assistant">
