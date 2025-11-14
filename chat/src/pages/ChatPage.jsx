@@ -1,4 +1,3 @@
-// Trang Chat
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, Plus} from "lucide-react";
 import { askTools } from "../lib/api.js";
@@ -53,14 +52,12 @@ function Header({ onBackToIntro, onReset, onScrollToBottom }) {
 
 /* Khối Welcome */
 function Welcome({ onExampleClick }) {
-  // Mẫu gợi ý
   const examples = [
     "Tôi muốn lên kế hoạch nội dung và đăng bài tự động",
     "Có app nào kết hợp lịch, việc và ghi chú không?",
     "Công cụ nào giúp tôi quản lý thời gian hiệu quả?",
   ];
   return (
-    // Khung welcome
     <div className="rounded-2xl border border-white/10 bg-[#0f1218]/90 backdrop-blur p-5 sm:p-6">
       <h2 className="text-2xl font-semibold mb-2 text-white">Xin chào bạn!</h2>
       <p className="text-sm text-white/80">
@@ -68,7 +65,6 @@ function Welcome({ onExampleClick }) {
         3 lựa chọn phù hợp nhất, kèm các bước hướng dẫn sử dụng công cụ đó.
       </p>
 
-      {/* Chức năng cho các button gợi ý */}
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
         {examples.map((ex, i) => (
           <button
@@ -97,7 +93,7 @@ function getTodayLabel() {
 /* Trang chat chính */
 export default function ChatPage() {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState(() => { // load từ localStorage
+  const [messages, setMessages] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(LS_KEY)) || [];
     } catch {
@@ -109,6 +105,9 @@ export default function ChatPage() {
   const [prefillText, setPrefillText] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
+  
+  // AbortController để hủy request
+  const abortControllerRef = useRef(null);
   
   const scrollRef = useRef(null);
   const hasMessages = useMemo(() => messages.length > 0, [messages]);
@@ -136,18 +135,54 @@ export default function ChatPage() {
     scrollToBottom("smooth");
   }, [messages, loading]);
 
+  // Cleanup abort controller khi unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
   function handleReset() {
+    // Hủy request đang chạy (nếu có)
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    
     setMessages([]);
     setActiveSuggestion(null);
     setErrorText("");
     setPrefillText("");
+    setLoading(false);
+    
     try {
       localStorage.removeItem(LS_KEY);
     } catch {
       /* noop */
     }
-    // Cuộn về cuối (lúc này gần như top container)
     requestAnimationFrame(() => scrollToBottom("auto"));
+  }
+
+  // Hàm dừng bot phản hồi
+  function handleStopBot() {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setLoading(false);
+    
+    // Thêm tin nhắn thông báo đã dừng
+    const dateStr = getTodayLabel();
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: "Đã dừng phản hồi theo yêu cầu của bạn!",
+        date: dateStr,
+      },
+    ]);
   }
 
   /* Map dữ liệu tool từ backend */
@@ -172,7 +207,6 @@ export default function ChatPage() {
         link: t?.url || null,
         favicon,
 
-        // Chuyển thành chuỗi chi tiết
         details: {
           overview: [
             t?.category && `- Nhóm: ${t.category}`,
@@ -214,11 +248,14 @@ export default function ChatPage() {
     ]);
     requestAnimationFrame(() => scrollToBottom("smooth"));
 
+    // Tạo AbortController mới
+    abortControllerRef.current = new AbortController();
+
     // Gọi backend
     setErrorText("");
     setLoading(true);
 
-    askTools(text.trim())
+    askTools(text.trim(), abortControllerRef.current.signal)
       .then((data) => {
         const tools = Array.isArray(data?.recommended_tools)
           ? data.recommended_tools
@@ -283,10 +320,15 @@ export default function ChatPage() {
           ...extra.map((m) => ({ ...m, date: dateStr })),
         ]);
 
-        // Cuộn sau khi nhận phản hồi từ chatbot
         requestAnimationFrame(() => scrollToBottom("smooth"));
       })
       .catch((err) => {
+        // Kiểm tra nếu là abort thì không hiện lỗi
+        if (err.name === 'AbortError') {
+          console.log('Request đã bị hủy');
+          return;
+        }
+        
         setErrorText(err?.message || "Không thể gọi API.");
         setMessages((prev) => [
           ...prev,
@@ -294,11 +336,15 @@ export default function ChatPage() {
             role: "assistant",
             content:
               "Xin lỗi, hiện không thể lấy gợi ý từ máy chủ. Hãy thử lại sau.",
+            date: dateStr,
           },
         ]);
         requestAnimationFrame(() => scrollToBottom("smooth"));
       })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        abortControllerRef.current = null;
+      });
   }
 
   return (
@@ -431,7 +477,12 @@ export default function ChatPage() {
         className="fixed bottom-0 left-0 right-0 z-20 pb-4"
       >
         <div className="max-w-3xl mx-auto px-5 sm:px-8">
-          <MessageInput onSend={addUserMessage} prefill={prefillText} />
+          <MessageInput 
+            onSend={addUserMessage} 
+            onStop={handleStopBot}
+            prefill={prefillText}
+            isLoading={loading}
+          />
         </div>
       </motion.div>
 

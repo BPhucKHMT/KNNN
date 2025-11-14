@@ -19,7 +19,7 @@ export default function ChatMessage({ role = 'assistant', children, time }) {
         </div>
         {/* Hiển thị thời gian cho User */}
         {isUser && time && (
-          <span className="text-[12px] text-gray-400 mt-1">
+          <span className="text-xs text-gray-400 mt-1">
             {time}
           </span>
         )}

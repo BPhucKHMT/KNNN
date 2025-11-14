@@ -1,14 +1,13 @@
-// Component input tin nhắn với auto-resize, gửi khi nhấn Enter, và prefill tự động gửi
+// Component input tin nhắn với auto-resize, gửi khi nhấn Enter, nút Pause và prefill tự động gửi
 import React, { useState, useEffect, useRef } from 'react';
-import { Send } from "lucide-react";
+import { Send, Square } from "lucide-react";
 
-export default function MessageInput({ onSend, prefill }) {
+export default function MessageInput({ onSend, onStop, prefill, isLoading }) {
   const [value, setValue] = useState('');
   const textareaRef = useRef(null);
 
   // Cuộn xuống cuối trang ngay sau khi gửi
   const scrollToBottomWindow = () => {
-    // Đợi DOM cập nhật xong rồi mới cuộn
     requestAnimationFrame(() => {
       window.scrollTo({
         top: document.body.scrollHeight,
@@ -44,7 +43,7 @@ export default function MessageInput({ onSend, prefill }) {
 
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (value.trim()) {
+      if (!isLoading && value.trim()) {
         onSend(value.trim());
         setValue('');
         scrollToBottomWindow();
@@ -52,9 +51,13 @@ export default function MessageInput({ onSend, prefill }) {
     }
   }
 
-  // Click nút Gửi
-  function handleClickSend() {
-    if (value.trim()) {
+  // Click nút Gửi hoặc Dừng
+  function handleClick() {
+    if (isLoading) {
+      // Đang loading -> dừng bot
+      onStop();
+    } else if (value.trim()) {
+      // Không loading -> gửi tin nhắn
       onSend(value.trim());
       setValue('');
       scrollToBottomWindow();
@@ -73,23 +76,32 @@ export default function MessageInput({ onSend, prefill }) {
           className="w-full bg-transparent text-gray-100 outline-none resize-none px-3 py-3 text-sm md:text-base"
           rows={1}
           aria-label="Nhập tin nhắn"
+          disabled={isLoading}
         />
         <div className="flex justify-end px-2 pb-1">
-          {/* Button gửi tin nhắn */}
+          {/* Button gửi tin nhắn hoặc dừng bot */}
           <button
-            onClick={handleClickSend}
-            disabled={!value.trim()}
+            onClick={handleClick}
+            disabled={!isLoading && !value.trim()}
             className={`
               w-10 h-10 flex items-center justify-center rounded-full
-              bg-white/10 border border-white/20 backdrop-blur
+              ${isLoading 
+                ? 'bg-red-500/20 border-red-500/40 hover:bg-red-500/30' 
+                : 'bg-white/10 border-white/20 hover:bg-white/20'
+              }
+              border backdrop-blur
               transition-all duration-300
-              hover:bg-white/20 hover:scale-110
+              hover:scale-110
               will-change-transform 
               disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed
             `}
-            title="Gửi tin nhắn"
+            title={isLoading ? "Dừng bot phản hồi" : "Gửi tin nhắn"}
           >
-            <Send className="w-5 h-5 text-white" />
+            {isLoading ? (
+              <Square className="w-4 h-4 text-red-400 fill-current" />
+            ) : (
+              <Send className="w-5 h-5 text-white" />
+            )}
           </button>
         </div>
       </div>
