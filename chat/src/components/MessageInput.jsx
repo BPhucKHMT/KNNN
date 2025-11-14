@@ -1,5 +1,4 @@
-// Component input tin nhắn với auto-resize, gửi khi nhấn Enter, nút Pause và prefill tự động gửi
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Send, Square } from "lucide-react";
 
 export default function MessageInput({ onSend, onStop, prefill, isLoading }) {
@@ -98,7 +97,7 @@ export default function MessageInput({ onSend, onStop, prefill, isLoading }) {
             title={isLoading ? "Dừng bot phản hồi" : "Gửi tin nhắn"}
           >
             {isLoading ? (
-              <Square className="w-4 h-4 text-red-400 fill-current" />
+              <Square className="w-5 h-5 text-red-400" />
             ) : (
               <Send className="w-5 h-5 text-white" />
             )}

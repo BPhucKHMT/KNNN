@@ -1,6 +1,6 @@
 import React from "react";
-import { motion } from "framer-motion";
 import Header from "../components/Header.jsx";
+import { motion } from "framer-motion";
 
 // Import logo images
 import facebookLogo from "../assets/Logo/Facebook.png";

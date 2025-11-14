@@ -27,6 +27,7 @@ function Header({ onBackToIntro, onReset, onScrollToBottom }) {
             <ChevronLeft className="w-5 h-5 text-white" />
           </button>
 
+          {/* Title */}
           <span
             onClick={onScrollToBottom}
             className="font-semibold tracking-wide text-white text-center cursor-pointer hover:text-pink-400 transition"
@@ -61,8 +62,9 @@ function Welcome({ onExampleClick }) {
     <div className="rounded-2xl border border-white/10 bg-[#0f1218]/90 backdrop-blur p-5 sm:p-6">
       <h2 className="text-2xl font-semibold mb-2 text-white">Xin chào bạn!</h2>
       <p className="text-sm text-white/80">
-        Hãy hỏi bất cứ điều gì về công cụ học tập trên Internet. Mình sẽ đề xuất
-        3 lựa chọn phù hợp nhất, kèm các bước hướng dẫn sử dụng công cụ đó.
+        Hãy đưa ra những yêu cầu trong học tập hay làm việc của bạn. 
+        Mình sẽ đề xuất những công cụ hữu ích trên Internet, 
+        kèm các bước hướng dẫn sử dụng, để đáp ứng nhu cầu của bạn.
       </p>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
@@ -89,7 +91,6 @@ function getTodayLabel() {
   });
 }
 
-
 /* Trang chat chính */
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -106,9 +107,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [errorText, setErrorText] = useState("");
   
-  // AbortController để hủy request
-  const abortControllerRef = useRef(null);
-  
+  const abortControllerRef = useRef(null);  // AbortController để hủy request
   const scrollRef = useRef(null);
   const hasMessages = useMemo(() => messages.length > 0, [messages]);
 
@@ -224,7 +223,6 @@ export default function ChatPage() {
     });
   }
 
-
   /* Gửi câu hỏi, gọi BE và render */
   function addUserMessage(text) {
     if (!text || !text.trim()) return;
@@ -248,7 +246,7 @@ export default function ChatPage() {
     ]);
     requestAnimationFrame(() => scrollToBottom("smooth"));
 
-    // Tạo AbortController mới
+    // Tạo AbortController mới để hủy request nếu cần
     abortControllerRef.current = new AbortController();
 
     // Gọi backend
@@ -319,7 +317,6 @@ export default function ChatPage() {
           },
           ...extra.map((m) => ({ ...m, date: dateStr })),
         ]);
-
         requestAnimationFrame(() => scrollToBottom("smooth"));
       })
       .catch((err) => {

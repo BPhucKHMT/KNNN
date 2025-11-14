@@ -1,5 +1,4 @@
-// Component popup modal hiển thị chi tiết công cụ
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { X } from "lucide-react";
 
 

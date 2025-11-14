@@ -29,8 +29,10 @@ frontend/
 │   ├── services/
 │   │   └── suggest.js                  # Service xử lý gợi ý từ backend
 │   │
-│   ├── assets/                         # Hình ảnh, logo
-│   │   └── .png
+│   ├── assets/                         # Thư mục chứa hình ảnh
+│   │   ├── Avatar
+│   │   ├── Background
+│   │   └── Logo
 │   │
 │   ├── App.jsx                         # Root component quản lý routes
 │   ├── main.jsx                        # Entry point cho Vite
@@ -42,6 +44,14 @@ frontend/
 
 ```
 ### Chạy FE
+- Cài đặt nodejs và npm
+- Cài đặt thư viện react cho fe
+```bash
+npm install lucide-react
+npm install framer-motion
+npm install react-router-dom
+```
+- Chạy giao diện fe
 ```bash
 cd chat
 npm install
@@ -52,14 +62,26 @@ npm run dev
 ```bash
 backend/
 ├── app.py                      # Flask API server (port 5000)
-├── myChat.py                   # AI chatbot với Google Gemini
-├── db_storage.py               # Cache system (FAISS + SQLite)
-├── requirements.txt            # Python dependencies
+├── myChat.py                   # Cấu hình json và call Google Gemini API
+├── db_storage.py               # Cấu hình cache data lưu prompt và response (FAISS + SQLite)
+├── requirements.txt            # Các thư viện python cần cài đặt
 ├── .env                        # API keys
 └── query_cache.db              # SQLite cache storage (auto-generated)
 ```
 ### Chạy BE
+- Cài đặt các thư viện python cần thiết
 ```bash
 python pip install -r requirements.txt
+```
+- Chạy server Flask
+```bash
 python app.py
+```
+- Xem thống kê cache
+```bash
+curl http://localhost:5000/cache/stats
+```
+- Xóa cache
+```bash
+curl -X POST http://localhost:5000/cache/clear
 ```

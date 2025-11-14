@@ -30,7 +30,7 @@ def query():
             return jsonify(cached_response)
         
         # Nếu không tìm thấy trong cache, gọi myChat
-        print(f"Calling AI model for new query")
+        print(f"Calling Gemini API for new query")
         response = handle_query(user_query)
         
         # Lưu vào cache

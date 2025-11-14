@@ -1,4 +1,3 @@
-// Component hiển thị tin nhắn chat với 2 role (user/assistant)
 import React from 'react';
 
 export default function ChatMessage({ role = 'assistant', children, time }) {

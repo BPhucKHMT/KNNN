@@ -41,7 +41,7 @@ def add_to_cache(query, response_dict):
     index.add(np.array([vec]).astype("float32"))
     id_map.append(new_id)
 
-def search_similar(query, threshold=0.92):
+def search_similar(query, threshold):
     """
     Tìm kiếm cache với threshold nghiêm ngặt hơn
     
@@ -49,7 +49,7 @@ def search_similar(query, threshold=0.92):
     - 0.95-0.98: Rất nghiêm ngặt - chỉ match câu gần như giống hệt
     - 0.90-0.94: Nghiêm ngặt - câu hỏi phải rất tương đồng
     - 0.85-0.89: Trung bình - cho phép biến thể nhẹ
-    - 0.80-0.84: Rộng - match nhiều câu tương tự (mặc định cũ)
+    - 0.80-0.84: Rộng - match nhiều câu tương tự
     """
     vec = EMBEDDING_MODEL.encode([query])[0]
     vec = normalize(vec).astype("float32")

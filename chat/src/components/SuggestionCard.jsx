@@ -1,4 +1,3 @@
-// Component card gợi ý công cụ, hiển thị title, favicon và summary ngắn
 import React from 'react';
 
 export default function SuggestionCard({ title, summary, iconUrl, onOpen }) {
