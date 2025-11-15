@@ -6,7 +6,7 @@ export default function MessageInput({ onSend, onStop, prefill, isLoading }) {
   const textareaRef = useRef(null);
 
   // Cuộn xuống cuối trang ngay sau khi gửi
-  const scrollToBottomWindow = () => {
+  const scrollToBottom = () => {
     requestAnimationFrame(() => {
       window.scrollTo({
         top: document.body.scrollHeight,
@@ -22,7 +22,7 @@ export default function MessageInput({ onSend, onStop, prefill, isLoading }) {
       setTimeout(() => {
         onSend(prefill);
         setValue('');
-        scrollToBottomWindow();
+        scrollToBottom();
       }, 200);
     }
   }, [prefill]);
@@ -45,7 +45,7 @@ export default function MessageInput({ onSend, onStop, prefill, isLoading }) {
       if (!isLoading && value.trim()) {
         onSend(value.trim());
         setValue('');
-        scrollToBottomWindow();
+        scrollToBottom();
       }
     }
   }
@@ -59,7 +59,7 @@ export default function MessageInput({ onSend, onStop, prefill, isLoading }) {
       // Không loading -> gửi tin nhắn
       onSend(value.trim());
       setValue('');
-      scrollToBottomWindow();
+      scrollToBottom();
     }
   }
 

@@ -4,8 +4,8 @@ import { motion } from "framer-motion";
 
 // Import logo images
 import facebookLogo from "../assets/Logo/Facebook.png";
+import zaloLogo from "../assets/Logo/Zalo.svg";
 import gmailLogo from "../assets/Logo/Gmail.png";
-import zaloLogo from "../assets/Logo/Zalo.png";
 import phoneLogo from "../assets/Logo/Phone.png";
 
 // Dữ liệu liên hệ

@@ -112,6 +112,9 @@ export default function ChatPage() {
   const scrollRef = useRef(null);
   const hasMessages = useMemo(() => messages.length > 0, [messages]);
 
+  const suggestionAnchorRef = useRef(null);
+  const [shouldScrollToSuggestion, setShouldScrollToSuggestion] = useState(false);
+
   // Cuộn xuống cuối vùng chat
   function scrollToBottom(behavior = "smooth") {
     window.scrollTo({
@@ -125,15 +128,33 @@ export default function ChatPage() {
     localStorage.setItem(LS_KEY, JSON.stringify(messages));
   }, [messages]);
 
-  // Cuộn xuống dưới cùng khi mới vào trang
+  // Auto-scroll khi mới vào trang
   useEffect(() => {
     scrollToBottom("smooth");
   }, []);
 
-  // Auto-scroll khi có tin nhắn mới hoặc đang loading
+  // Auto-scroll khi có tin nhắn đang loading
   useEffect(() => {
-    scrollToBottom("smooth");
-  }, [messages, loading]);
+    if (loading)
+      scrollToBottom("smooth");
+  }, [loading]);
+
+  // Auto-scroll đến khối gợi ý khi có tin nhắn suggestion mới
+  useEffect(() => {
+    if (!shouldScrollToSuggestion) return;
+    const el = suggestionAnchorRef.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      const HEADER_OFFSET = 220;
+      const targetY = window.scrollY + rect.top - HEADER_OFFSET;
+
+      window.scrollTo({
+        top: Math.max(0, targetY),
+        behavior: "smooth",
+      });
+    }
+  setShouldScrollToSuggestion(false);
+}, [shouldScrollToSuggestion, messages]);
 
   // Cleanup abort controller khi unmount
   useEffect(() => {
@@ -320,7 +341,7 @@ export default function ChatPage() {
           },
           ...extra.map((m) => ({ ...m, date: dateStr })),
         ]);
-        requestAnimationFrame(() => scrollToBottom("smooth"));
+        setShouldScrollToSuggestion(true);
       })
       .catch((err) => {
         // Kiểm tra nếu là abort thì không hiện lỗi
@@ -339,7 +360,6 @@ export default function ChatPage() {
             date: dateStr,
           },
         ]);
-        requestAnimationFrame(() => scrollToBottom("smooth"));
       })
       .finally(() => {
         setLoading(false);
@@ -384,6 +404,12 @@ export default function ChatPage() {
 
             {(() => {
               let lastDate = null;
+              
+              const lastSuggestionIndex = messages.reduceRight(
+                (acc, msg, index) =>
+                  acc === -1 && msg.type === "suggestionRow" ? index : acc,
+                -1
+              );
 
               return messages.map((m, idx) => {
                 const showDate = m.date && m.date !== lastDate;
@@ -415,10 +441,15 @@ export default function ChatPage() {
                 // Hàng suggestion
                 if (m.type === "suggestionRow") {
                   const items = m.payload || [];
+                  const isLatestSuggestion = idx === lastSuggestionIndex;
+
                   return (
                     <>
                       {dateSeparator}
-                      <div className="w-full my-3">
+                      <div
+                        className="w-full my-3"
+                        ref={isLatestSuggestion ? suggestionAnchorRef : null}
+                      >
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           {items.map((s, i) => (
                             <SuggestionCard
@@ -434,7 +465,7 @@ export default function ChatPage() {
                     </>
                   );
                 }
-                
+
                 // Bảng so sánh
                 if (m.type === "comparisonTable") {
                   return (
@@ -505,77 +536,13 @@ export default function ChatPage() {
       <Modal
         open={!!activeSuggestion}
         title={activeSuggestion?.title}
-        iconUrl={activeSuggestion?.favicon} 
+        iconUrl={activeSuggestion?.favicon}
         link={activeSuggestion?.link}
+        summary={activeSuggestion?.summary}
+        details={activeSuggestion?.details}
+        bestFor={activeSuggestion?.details?.bestFor}
         onClose={() => setActiveSuggestion(null)}
-      >
-        <div className="space-y-6 text-sm leading-relaxed">
-
-          {/* Giới thiệu */}
-          {activeSuggestion?.summary && (
-            <section>
-              <h4 className="font-semibold text-white mb-1">Giới thiệu:</h4>
-              <p className="text-gray-300">{activeSuggestion.summary}</p>
-            </section>
-          )}
-
-          {/* Chi tiết */}
-          <section>
-            <h4 className="font-semibold text-white mb-1">Chi tiết:</h4>
-
-            {/* Nhóm / Chi phí / Thời gian / Độ khó */}
-            <div className="space-y-1 text-gray-300">
-              {activeSuggestion?.details?.overview?.map((line, i) => (
-                <div key={i}>{line}</div>
-              ))}
-            </div>
-
-            {/* Ưu điểm */}
-            {activeSuggestion?.details?.advantages && (
-              <div className="mt-4">
-                <h4 className="font-semibold text-white">✓ Ưu điểm:</h4>
-                <ul className="list-disc ml-5 text-gray-300 mt-1">
-                  {activeSuggestion.details.advantages.map((adv, i) => (
-                    <li key={i}>{adv}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Nhược điểm */}
-            {activeSuggestion?.details?.disadvantages && (
-              <div className="mt-4">
-                <h4 className="font-semibold text-white">✗ Nhược điểm:</h4>
-                <ul className="list-disc ml-5 text-gray-300 mt-1">
-                  {activeSuggestion.details.disadvantages.map((dis, i) => (
-                    <li key={i}>{dis}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Hướng dẫn nhanh */}
-            {activeSuggestion?.details?.quickGuide && (
-              <div className="mt-4">
-                <h4 className="font-semibold text-white">Hướng dẫn nhanh:</h4>
-                <ol className="list-decimal ml-5 text-gray-300 mt-1">
-                  {activeSuggestion.details.quickGuide.map((step, i) => (
-                    <li key={i}>{step}</li>
-                  ))}
-                </ol>
-              </div>
-            )}
-
-            {/* Phù hợp nhất cho */}
-            {activeSuggestion?.details?.bestFor && (
-              <div className="mt-4">
-                <h4 className="font-semibold text-white">Phù hợp nhất cho:</h4>
-                <p className="text-gray-300 mt-1">{activeSuggestion.details.bestFor}</p>
-              </div>
-            )}
-          </section>
-        </div>
-      </Modal>
+      />
     </div>
   );
 }

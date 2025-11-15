@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { X } from "lucide-react";
 
 
-export default function Modal({ open, title, iconUrl, children, link, onClose }) {
+export default function Modal({ open, title, iconUrl, link, details, summary, bestFor, onClose}) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -64,11 +64,69 @@ export default function Modal({ open, title, iconUrl, children, link, onClose })
         {/* Nội dung */}
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <div className="text-gray-300 text-sm whitespace-pre-wrap leading-relaxed">
-            {children}
+            <div className="space-y-6 text-gray-300 text-sm">              
+              {/* Giới thiệu */}
+              {summary && (
+                <section>
+                  <h4 className="font-semibold text-white mb-1">Giới thiệu:</h4>
+                  <p>{summary}</p>
+                </section>
+              )}
+              
+              {/* Chi tiết */}
+              {details?.overview?.length > 0 && (
+                <section>
+                  <h4 className="font-semibold text-white mb-1">Chi tiết:</h4>
+                  <div className="space-y-1">
+                    {details.overview.map((line, i) => <div key={i}>{line}</div>)}
+                  </div>
+                </section>
+              )}
+              
+              {/* Ưu điểm */}
+              {details?.advantages && (
+                <section>
+                  <h4 className="font-semibold text-white">✓ Ưu điểm</h4>
+                  <ul className="list-disc ml-5 mt-1">
+                    {details.advantages.map((adv, i) => <li key={i}>{adv}</li>)}
+                  </ul>
+                </section>
+              )}
+              
+              {/* Nhược điểm */}
+              {details?.disadvantages && (
+                <section>
+                  <h4 className="font-semibold text-white">✗ Nhược điểm</h4>
+                  <ul className="list-disc ml-5 mt-1">
+                    {details.disadvantages.map((d, i) => <li key={i}>{d}</li>)}
+                  </ul>
+                </section>
+              )}
+              
+              {/* Hướng dẫn nhanh */}
+              {details?.quickGuide && details.quickGuide.length > 0 && (
+                <section>
+                  <h4 className="font-semibold text-white">Hướng dẫn nhanh:</h4>
+                  <ol className="list-decimal ml-5 mt-1">
+                    {details.quickGuide.map((step, i) => (
+                      <li key={i}>{step}</li>
+                    ))}
+                  </ol>
+                </section>
+              )}
+              
+              {/* Phù hợp nhất cho */}
+              {bestFor && (
+                <section>
+                  <h4 className="font-semibold text-white">Phù hợp nhất cho:</h4>
+                  <p className="mt-1">{bestFor}</p>
+                </section>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Footer với link (nếu có) */}
+        {/* Footer với link */}
         {link && (
           <div className="flex-shrink-0 px-5 py-4 border-t border-white/10">
             <a

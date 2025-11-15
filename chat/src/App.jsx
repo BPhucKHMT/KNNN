@@ -17,7 +17,7 @@ export default function App() {
         <Route path="/chat" element={<ChatPage />} />
         {/* Trang About Us */}
         <Route path="/about" element={<AboutPage />} />
-        {/* Trang Support (placeholder) */}
+        {/* Trang Support */}
         <Route path="/support" element={<SupportPage />} />
         {/* Redirect các route không tồn tại về trang chủ */}
         <Route path="*" element={<Navigate to="/" replace />} />
