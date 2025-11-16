@@ -297,16 +297,14 @@ Bạn là một mô-đun PHÂN LOẠI câu hỏi cho hệ thống tư vấn côn
 MỤC ĐÍCH PHÂN LOẠI
 
 Hệ thống có 2 chế độ:
-1) Dùng khi người dùng muốn được TÌM / CHỌN / GỢI Ý / GIỚI THIỆU / SO SÁNH / LỰA CHỌN
+1) TOOLS: Dùng khi người dùng muốn được TÌM / CHỌN / GỢI Ý / GIỚI THIỆU / SO SÁNH / LỰA CHỌN (hoặc ngữ cảnh tương tự)
    - công cụ, phần mềm, ứng dụng, app, web, nền tảng, ngôn ngữ, dịch vụ, khoá học online,...
 => Trả lời từ khóa DUY NHẤT: TOOLS
-2) Dùng cho các câu hỏi còn lại (chào hỏi, hỏi kiến thức chung, không yêu cầu chỉ rõ công cụ, small talk,...).
+2) CHAT: Dùng cho các câu hỏi còn lại (chào hỏi, hỏi kiến thức chung, small talk, hướng dẫn nhanh,...).
 => Trả lời từ khóa DUY NHẤT: CHAT
 
 LƯU Ý QUAN TRỌNG:
 - Chỉ trả lời đúng một trong hai từ khóa TOOLS hoặc CHAT, KHÔNG được thêm gì khác.
-- Nếu câu hỏi có liên quan đến việc TÌM / CHỌN / GỢI Ý / GIỚI THIỆU / SO SÁNH / LỰA CHỌN công cụ, dù chỉ giống một chút, hãy phân loại là TOOLS.
-- Ngược lại, nếu câu hỏi không hề liên quan đến công cụ, hãy phân loại là CHAT.
 
 Bây giờ hãy phân loại câu sau:
 
@@ -333,7 +331,7 @@ Assistant:
 # Model cho chat bình thường (không structured_output)
 _general_chat_model = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",
-    temperature=0.7,
+    temperature=0,
     max_output_tokens=None,
     timeout=None,
     max_retries=3,
