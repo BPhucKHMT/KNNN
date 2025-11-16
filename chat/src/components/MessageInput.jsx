@@ -65,7 +65,7 @@ export default function MessageInput({ onSend, onStop, prefill, isLoading }) {
 
   return (
     <div>
-      <div className="border border-white/10 bg-[#0f1218]/60 backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] p-2 transition-colors">
+      <div className="border border-white/10 hover:border-blue-600/60 bg-panel/60 backdrop-blur-xl rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] p-2 transition-colors">
         <textarea
           ref={textareaRef}
           value={value}

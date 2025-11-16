@@ -1,7 +1,7 @@
 from unittest import result
 from flask import Flask, json, request, jsonify
 from flask_cors import CORS
-from myChat import handle_query
+from myChat import handle_query, is_tool_query, general_chat
 from db_storage import add_to_cache, search_similar, clear_cache, get_cache_stats
 import re
 import os
@@ -20,26 +20,51 @@ def query():
         return jsonify({"error": "Missing query parameter 'q'"}), 400
 
     try:
-        # Tìm kiếm trong cache trước với threshold có thể cấu hình
-        cached_query, cached_response, score = search_similar(user_query, threshold=CACHE_THRESHOLD)
+        # CASE 1: Câu hỏi liên quan đến việc TÌM CÔNG CỤ
+        if is_tool_query(user_query):
+            # Tìm kiếm trong cache trước với threshold có thể cấu hình
+            cached_query, cached_response, score = search_similar(
+                user_query,
+                threshold=CACHE_THRESHOLD
+            )
         
-        print(f"Cache check - Query: '{user_query[:50]}...' | Score: {score:.4f} | Threshold: {CACHE_THRESHOLD}")
+            print(
+                    f"[TOOLS] Cache check - Query: '{user_query[:50]}...' | "
+                    f"Score: {score:.4f} | Threshold: {CACHE_THRESHOLD}"
+                )
+            
+            if cached_response:
+                print(f"✅ [TOOLS] Returning from cache (score: {score:.4f})")
+                    # Đảm bảo có mode để FE nhận diện
+                if "mode" not in cached_response:
+                    cached_response["mode"] = "tools"
+                return jsonify(cached_response)
+            
+            # Nếu không tìm thấy trong cache, gọi Gemini structured (myChat.handle_query)
+            print("[TOOLS] Calling Gemini API for new query")
+            response = handle_query(user_query)
+            
+            # Thêm mode cho FE nhận diện
+            if isinstance(response, dict):
+                response.setdefault("mode", "tools")
+
+            # Lưu vào cache
+            add_to_cache(user_query, response)
+            print(f"Saved to cache: '{user_query[:50]}...'")
+            
+            # Trả về response json cho FE
+            return jsonify(response)
         
-        if cached_response:
-            print(f"✅ Returning from cache (score: {score:.4f})")
-            return jsonify(cached_response)
-        
-        # Nếu không tìm thấy trong cache, gọi myChat
-        print(f"Calling Gemini API for new query")
-        response = handle_query(user_query)
-        
-        # Lưu vào cache
-        add_to_cache(user_query, response)
-        print(f"Saved to cache: '{user_query[:50]}...'")
-        
-        # Trả về response
-        return jsonify(response)
-        
+        # CASE 2: Câu hỏi bình thường
+        print(f"[CHAT] General chat for query: '{user_query[:50]}...'")
+        reply_text = general_chat(user_query)
+
+        # Không lưu cache
+        return jsonify({
+            "mode": "chat",
+            "reply": reply_text
+        })
+
     except Exception as e:
         print(f"❌ Error: {str(e)}")
         return jsonify({"error": str(e)}), 500

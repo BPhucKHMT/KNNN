@@ -62,7 +62,7 @@ npm run dev
 ```bash
 backend/
 ├── app.py                      # Flask API server (port 5000)
-├── myChat.py                   # Cấu hình json và call Google Gemini API
+├── myChat.py                   # Cấu hình json response và call Gemini API
 ├── db_storage.py               # Cấu hình cache data lưu prompt và response (FAISS + SQLite)
 ├── requirements.txt            # Các thư viện python cần cài đặt
 ├── .env                        # API keys
@@ -83,5 +83,5 @@ curl http://localhost:5000/cache/stats
 ```
 - Xóa cache
 ```bash
-curl -X POST http://localhost:5000/cache/clear
+curl "http://localhost:5000/cache/clear" -Method POST
 ```

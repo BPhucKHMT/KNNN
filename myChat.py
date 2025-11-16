@@ -8,7 +8,7 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # JSON Schema cho structured output
 json_schema = {
-  "title": "ToolInfoSchema",  # ✅ phải có title hợp lệ (a-z, A-Z, 0-9, _, -, ., :)
+  "title": "ToolInfoSchema",  # phải có title hợp lệ (a-z, A-Z, 0-9, _, -, ., :)
   "type": "object",
   "properties": {
     "recommended_tools": {
@@ -80,17 +80,17 @@ class TechConsultant:
         
         # System message chi tiết
         system_message = SystemMessage(content="""
-Bạn là chuyên gia tư vấn công cụ công nghệ với kinh nghiệm 10+ năm.
+Bạn là một trợ lý AI chuyên tư vấn công cụ công nghệ trên Internet.
 
 NHIỆM VỤ:
 - Phân tích nhu cầu của người dùng
 - Đề xuất 2-4 công cụ phù hợp nhất  
 - So sánh chi tiết ưu/nhược điểm
 - Đưa ra lời khuyên cụ thể 
--Các bước tiếp theo chỉ cần liệt kê (không cần các tiêu đề hãy gì hết)
--Không được thiếu các trường trong JSON trả về
--Ở comparison mỗi công cụ phải là một mục riêng biệt không được gộp lại so sánh chung
--Không cần phải đánh dấu ** ** cho các tiêu đề
+- Các bước tiếp theo chỉ cần liệt kê (không cần các tiêu đề hãy gì hết)
+- Không được thiếu các trường trong JSON trả về
+- Ở comparison mỗi công cụ phải là một mục riêng biệt không được gộp lại so sánh chung
+- Không cần phải đánh dấu ** ** cho các tiêu đề
 - Cung cấp hướng dẫn bước đầu
 
 LĨNH VỰC CHUYÊN MÔN:
@@ -111,7 +111,6 @@ NGUYÊN TẮC TƯ VẤN:
 
 BẮT BUỘC: Luôn trả về JSON hợp lệ theo schema sau, không thiếu bất kỳ field nào.
 Nếu không chắc giá trị, hãy trả về chuỗi `"Unknown"` hoặc mảng rỗng `[]`, KHÔNG được bỏ qua field.
-
 
 Trả lời bằng tiếng Việt, thân thiện và chuyên nghiệp.
 """)
@@ -147,7 +146,7 @@ Câu hỏi: {question}
             return validated_response
             
         except Exception as e:
-            print(f"🔴 Error: {str(e)}")
+            print(f"❌ Error: {str(e)}")
             
             # Fallback response
             fallback_response = {
@@ -272,3 +271,94 @@ def handle_query(query):
                 "next_steps": ["Thử lại câu hỏi"]
             }
             '''
+
+# Model chuyên dùng để PHÂN LOẠI query (TOOLS / CHAT)
+_mode_classifier_model = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0,
+    max_output_tokens=None,
+    timeout=None,
+    max_retries=3,
+)
+
+def is_tool_query(query: str) -> bool:
+    """
+    Dùng Gemini để phân loại xem câu hỏi có đang cần tư vấn công cụ hay không.
+    Trả về:
+      - True  => query là dạng "tìm công cụ"
+      - False => query là chat bình thường (chào hỏi, hỏi thông tin chung, small talk,...)
+    """
+    if not query:
+        return False
+
+    classification_prompt = f"""
+Bạn là một mô-đun PHÂN LOẠI câu hỏi cho hệ thống tư vấn công cụ.
+
+MỤC ĐÍCH PHÂN LOẠI
+
+Hệ thống có 2 chế độ:
+1) Dùng khi người dùng muốn được TÌM / CHỌN / GỢI Ý / GIỚI THIỆU / SO SÁNH / LỰA CHỌN
+   - công cụ, phần mềm, ứng dụng, app, web, nền tảng, ngôn ngữ, dịch vụ, khoá học online,...
+=> Trả lời từ khóa DUY NHẤT: TOOLS
+2) Dùng cho các câu hỏi còn lại (chào hỏi, hỏi kiến thức chung, không yêu cầu chỉ rõ công cụ, small talk,...).
+=> Trả lời từ khóa DUY NHẤT: CHAT
+
+LƯU Ý QUAN TRỌNG:
+- Chỉ trả lời đúng một trong hai từ khóa TOOLS hoặc CHAT, KHÔNG được thêm gì khác.
+- Nếu câu hỏi có liên quan đến việc TÌM / CHỌN / GỢI Ý / GIỚI THIỆU / SO SÁNH / LỰA CHỌN công cụ, dù chỉ giống một chút, hãy phân loại là TOOLS.
+- Ngược lại, nếu câu hỏi không hề liên quan đến công cụ, hãy phân loại là CHAT.
+
+Bây giờ hãy phân loại câu sau:
+
+User: "{query}"
+Assistant:
+"""
+    resp = _mode_classifier_model.invoke(classification_prompt)
+
+    try:
+        text = resp.content.strip().upper()
+    except AttributeError:
+        text = str(resp).strip().upper()
+
+    # Debug cho dễ theo dõi server log
+    print(f"[CLASSIFIER] Query: {query!r} -> Raw: {text!r}")
+
+    # Nếu model trả đúng TOOLS thì coi là tìm công cụ
+    if "TOOLS" in text:
+        return True
+
+    # Mặc định là CHAT
+    return False
+
+# Model cho chat bình thường (không structured_output)
+_general_chat_model = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0.7,
+    max_output_tokens=None,
+    timeout=None,
+    max_retries=3,
+)
+
+def general_chat(query: str) -> str:
+    """
+    Trả lời các câu hỏi bình thường (chào hỏi, giới thiệu, small talk,...)
+    dưới dạng text thuần, không JSON.
+    """
+    prompt = f"""
+Bạn là một trợ lý AI chuyên tư vấn công cụ công nghệ trên Internet.
+
+YÊU CẦU:
+- Trả lời bằng tiếng Việt, thân thiện và chuyên nghiệp.
+- Không dùng Markdown, không trả về JSON.
+- Chỉ trả về nội dung câu trả lời, không thêm prefix như "Assistant:".
+
+Người dùng: {query}
+Trả lời:
+"""
+    resp = _general_chat_model.invoke(prompt)
+
+    # Tùy object trả về, lấy content cho an toàn
+    try:
+        return resp.content
+    except AttributeError:
+        return str(resp)

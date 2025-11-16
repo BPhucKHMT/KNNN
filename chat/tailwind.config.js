@@ -8,7 +8,7 @@ export default {
     extend: {
       colors: {
         surface: '#0b0f16', // màu nền chính
-        panel: '#111827', // màu nền panel/chat bubble
+        panel: '#0f1218', // màu nền panel/chat bubble
         bubbleUser: '#1f2937', // màu bubble người dùng
         bubbleBot: '#0f172a' // màu bubble bot
       },

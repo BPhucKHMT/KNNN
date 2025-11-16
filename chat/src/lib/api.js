@@ -7,7 +7,7 @@ export async function askTools(query, signal) {
     method: 'GET',
     signal // Thêm signal để có thể abort request
   });
-  
+   
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`API ${res.status}: ${text || 'Unknown error'}`);

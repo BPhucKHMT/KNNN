@@ -277,6 +277,31 @@ export default function ChatPage() {
 
     askTools(text.trim(), abortControllerRef.current.signal)
       .then((data) => {
+        // Case bot trả lời bình thường
+        if (data?.mode === "chat") {
+          const now2 = new Date();
+          const timeStr2 = now2.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: "assistant",
+              content:
+                data.reply ||
+                "Xin lỗi, mình chưa có câu trả lời phù hợp cho câu hỏi này.",
+              time: timeStr2,
+              date: dateStr,
+            },
+          ]);
+
+          // Ở case này không cần scroll tới suggestion
+          return;
+        }
+
+        // Case bot trả lời gợi ý tool
         const tools = Array.isArray(data?.recommended_tools)
           ? data.recommended_tools
           : [];
@@ -321,7 +346,9 @@ export default function ChatPage() {
           });
           extra.push({
             role: "assistant",
-            content: data.next_steps.map((s, i) => `${i + 1}. ${s}`).join("\n"),
+            content: data.next_steps
+              .map((s, i) => `${i + 1}. ${s}`)
+              .join("\n"),
           });
         }
 
@@ -330,19 +357,23 @@ export default function ChatPage() {
           {
             role: "assistant",
             type: "preface",
-            content: "Dưới đây là những công cụ phù hợp nhất cho nhu cầu của bạn:",
+            content:
+              "Dưới đây là những công cụ phù hợp nhất cho nhu cầu của bạn:",
             date: dateStr,
           },
-          { 
-            role: "assistant", 
-            type: "suggestionRow", 
+          {
+            role: "assistant",
+            type: "suggestionRow",
             payload: mapped,
             date: dateStr,
           },
           ...extra.map((m) => ({ ...m, date: dateStr })),
         ]);
+
+        // Chỉ scroll đặc biệt khi có suggestion row
         setShouldScrollToSuggestion(true);
       })
+
       .catch((err) => {
         // Kiểm tra nếu là abort thì không hiện lỗi
         if (err.name === 'AbortError') {
@@ -497,7 +528,7 @@ export default function ChatPage() {
               <ChatMessage role="assistant">
                 <div className="flex items-center space-x-3">
                   <span className="text-xs text-gray-400">
-                    Đang tìm công cụ phù hợp cho bạn
+                    Đang xử lí yêu cầu của bạn
                   </span>
                   <div className="flex items-end space-x-1">
                     <span className="w-2 h-2 rounded-full bg-gray-300/80 animate-bounce [animation-delay:-0.3s]" />
