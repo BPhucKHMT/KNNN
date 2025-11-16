@@ -357,8 +357,7 @@ export default function ChatPage() {
           {
             role: "assistant",
             type: "preface",
-            content:
-              "Dưới đây là những công cụ phù hợp nhất cho nhu cầu của bạn:",
+            content: data.intro,
             date: dateStr,
           },
           {

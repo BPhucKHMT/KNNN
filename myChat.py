@@ -8,9 +8,13 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # JSON Schema cho structured output
 json_schema = {
-  "title": "ToolInfoSchema",  # phải có title hợp lệ (a-z, A-Z, 0-9, _, -, ., :)
+  "title": "ToolInfoSchema",
   "type": "object",
   "properties": {
+    "intro": {
+      "type": "string",
+      "description": "Lời mở đầu, bám sát ngữ cảnh câu hỏi của người dùng"
+    },
     "recommended_tools": {
       "type": "array",
       "description": "Danh sách công cụ đề xuất",
@@ -54,9 +58,9 @@ json_schema = {
       "items": { "type": "string" }
     },
     "final_recommendation": {
-         "type": "array",
-        "description": "Lời khuyên cuối cùng",
-        "items": { "type": "string" }
+      "type": "array",
+      "description": "Lời khuyên cuối cùng",
+      "items": { "type": "string" }
     },
     "next_steps": {
       "type": "array",
@@ -64,8 +68,9 @@ json_schema = {
       "items": { "type": "string" }
     }
   },
-  "required": ["recommended_tools", "comparison", "final_recommendation", "next_steps"]
+  "required": ["intro", "recommended_tools", "comparison", "final_recommendation", "next_steps"]
 }
+
 
 class TechConsultant:
     def __init__(self, model="gemini-2.5-flash", temperature=0):
@@ -127,9 +132,7 @@ Trả lời bằng tiếng Việt, thân thiện và chuyên nghiệp.
         enhanced_question = f"""
 Câu hỏi: {question}
 
-
 """
-        
         self.messages.append(HumanMessage(content=enhanced_question))
         
         try:
@@ -150,6 +153,7 @@ Câu hỏi: {question}
             
             # Fallback response
             fallback_response = {
+                            "intro": "Hiện tại hệ thống đang gặp lỗi!",
                             "recommended_tools": [{
                                 "name": "Lỗi hệ thống",
                                 "category": "Error",
@@ -182,6 +186,7 @@ Câu hỏi: {question}
         except Exception as e:
             print(f"🟡 Validation error: {e}")
             return {
+                "intro": "Đã xảy ra lỗi khi xử lý phản hồi!",
                 "recommended_tools": [{
                     "name": "Lỗi validation",
                     "category": "Error",
@@ -213,6 +218,54 @@ Câu hỏi: {question}
         """Lấy tóm tắt cuộc trò chuyện"""
         human_msgs = [msg for msg in self.messages if isinstance(msg, HumanMessage)]
         return f"Đã có {len(human_msgs)} câu hỏi trong cuộc trò chuyện này"
+    
+    def general_chat_with_memory(self, question: str) -> str:
+        """
+        Trả lời các câu hỏi chat bình thường (small talk, hỏi thông tin, v.v.)
+        nhưng CÓ sử dụng lại lịch sử self.messages làm context chung.
+        """
+        # System riêng cho chế độ chat thường (không JSON)
+        chat_system = SystemMessage(content="""
+Bạn là một trợ lý AI thân thiện hỗ trợ người dùng bằng tiếng Việt.
+
+BỐI CẢNH:
+- Bạn đang trò chuyện liên tục với người dùng trong CÙNG MỘT PHIÊN.
+- Bạn có thể tham chiếu lại những gì người dùng đã hỏi / bạn đã trả lời trước đó
+  trong phiên hiện tại nếu điều đó giúp câu trả lời tự nhiên hơn.
+
+YÊU CẦU:
+- Trả lời ngắn gọn, rõ ràng, bám sát câu hỏi hiện tại.
+- Không trả về JSON, không dùng Markdown, chỉ là văn bản thuần.
+- Không cần nhắc lại toàn bộ lịch sử, chỉ liên hệ khi thực sự cần thiết.
+""")
+
+        # Lấy lịch sử hiện tại nhưng bỏ system message gốc (dành cho tư vấn công cụ)
+        history_without_system = [
+            msg for msg in self.messages
+            if not isinstance(msg, SystemMessage)
+        ]
+
+        # Xây dựng list messages gửi lên model chat thường
+        messages = [
+            chat_system,
+            *history_without_system,
+            HumanMessage(content=question)
+        ]
+
+        # Gọi model chat thường với full context
+        resp = _general_chat_model.invoke(messages)
+
+        try:
+            reply_text = resp.content
+        except AttributeError:
+            reply_text = str(resp)
+
+        # Lưu tiếp đoạn hội thoại này vào self.messages để lần sau còn nhớ
+        self.messages.append(HumanMessage(content=question))
+        self.messages.append(AIMessage(content=reply_text))
+
+        return reply_text
+
 
 # Global instance để duy trì conversation
 _tech_consultant = None
@@ -319,7 +372,7 @@ Assistant:
         text = str(resp).strip().upper()
 
     # Debug cho dễ theo dõi server log
-    print(f"[CLASSIFIER] Query: {query!r} -> Raw: {text!r}")
+    print(f"[TYPE] Query: {query!r} -> Raw: {text!r}")
 
     # Nếu model trả đúng TOOLS thì coi là tìm công cụ
     if "TOOLS" in text:
@@ -340,23 +393,7 @@ _general_chat_model = ChatGoogleGenerativeAI(
 def general_chat(query: str) -> str:
     """
     Trả lời các câu hỏi bình thường (chào hỏi, giới thiệu, small talk,...)
-    dưới dạng text thuần, không JSON.
+    nhưng dùng CHUNG lịch sử hội thoại của TechConsultant.
     """
-    prompt = f"""
-Bạn là một trợ lý AI chuyên tư vấn công cụ công nghệ trên Internet.
-
-YÊU CẦU:
-- Trả lời bằng tiếng Việt, thân thiện và chuyên nghiệp.
-- Không dùng Markdown, không trả về JSON.
-- Chỉ trả về nội dung câu trả lời, không thêm prefix như "Assistant:".
-
-Người dùng: {query}
-Trả lời:
-"""
-    resp = _general_chat_model.invoke(prompt)
-
-    # Tùy object trả về, lấy content cho an toàn
-    try:
-        return resp.content
-    except AttributeError:
-        return str(resp)
+    consultant = get_consultant()
+    return consultant.general_chat_with_memory(query)
