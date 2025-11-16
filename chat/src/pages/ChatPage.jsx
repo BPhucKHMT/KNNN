@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, Plus} from "lucide-react";
-import { askTools } from "../lib/api.js";
+import { askTools, resetConversation } from "../lib/api.js";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -172,6 +172,7 @@ export default function ChatPage() {
       abortControllerRef.current = null;
     }
     
+    // Reset UI FE
     setMessages([]);
     setActiveSuggestion(null);
     setErrorText("");
@@ -183,6 +184,12 @@ export default function ChatPage() {
     } catch {
       /* noop */
     }
+
+    // Gọi API reset BE
+    resetConversation().catch((err) => {
+    console.error("Reset cuộc hội thoại trên Server thất bại: ", err);
+  });
+
     requestAnimationFrame(() => scrollToBottom("auto"));
   }
 

@@ -1,7 +1,7 @@
 from unittest import result
 from flask import Flask, json, request, jsonify
 from flask_cors import CORS
-from myChat import handle_query, is_tool_query, general_chat
+from myChat import handle_query, is_tool_query, general_chat, reset_consultation
 from db_storage import add_to_cache, search_similar, clear_cache, get_cache_stats
 import re
 import os
@@ -12,6 +12,7 @@ CORS(app)  # cho phép React call API
 # Cấu hình threshold
 CACHE_THRESHOLD = float(os.getenv("CACHE_THRESHOLD", "0.92"))
 
+# Endpoint chính để xử lý câu hỏi từ FE
 @app.route("/query", methods=["GET"])
 def query():
     user_query = request.args.get("q")
@@ -69,6 +70,7 @@ def query():
         print(f"❌ Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
+# Endpoint để xem thống kê cache
 @app.route("/cache/stats", methods=["GET"])
 def cache_stats():
     """Endpoint để xem thống kê cache"""
@@ -82,6 +84,7 @@ def cache_stats():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+# Endpoint để xóa toàn bộ cache
 @app.route("/cache/clear", methods=["POST"])
 def cache_clear():
     """Endpoint để xóa toàn bộ cache"""
@@ -93,6 +96,26 @@ def cache_clear():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Endpoint để reset cuộc hội thoại
+@app.route("/conversation/reset", methods=["POST"])
+def conversation_reset():
+    """
+    Reset cuộc hội thoại hiện tại trên BE:
+    - Xóa lịch sử trong TechConsultant
+    - Khởi tạo lại messages ban đầu
+    """
+    try:
+        msg = reset_consultation()
+        return jsonify({
+            "success": True,
+            "message": msg
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": str(e)
+        }), 500
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
