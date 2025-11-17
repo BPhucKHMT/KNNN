@@ -28,14 +28,9 @@ def query():
                 user_query,
                 threshold=CACHE_THRESHOLD
             )
-        
-            print(
-                    f"[TOOLS] Cache check - Query: '{user_query[:50]}...' | "
-                    f"Score: {score:.4f} | Threshold: {CACHE_THRESHOLD}"
-                )
             
             if cached_response:
-                print(f"✅ [TOOLS] Returning from cache (score: {score:.4f})")
+                print(f"[TOOLS] Returning from cache (score: {score:.4f})")
                     # Đảm bảo có mode để FE nhận diện
                 if "mode" not in cached_response:
                     cached_response["mode"] = "tools"

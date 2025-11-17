@@ -73,6 +73,10 @@ backend/
 ```bash
 python pip install -r requirements.txt
 ```
+- Tạo file .env và đặt Gemini API key
+```bash
+GOOGLE_API_KEY=""
+```
 - Chạy server Flask
 ```bash
 python app.py

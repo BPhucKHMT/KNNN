@@ -13,7 +13,7 @@ json_schema = {
   "properties": {
     "intro": {
       "type": "string",
-      "description": "Lời mở đầu, bám sát ngữ cảnh câu hỏi của người dùng"
+      "description": "Lời mở đầu, không chào hỏi, đi thẳng vào vấn đề"
     },
     "recommended_tools": {
       "type": "array",
@@ -71,7 +71,6 @@ json_schema = {
   "required": ["intro", "recommended_tools", "comparison", "final_recommendation", "next_steps"]
 }
 
-
 class TechConsultant:
     def __init__(self, model="gemini-2.5-flash", temperature=0):
         # Sử dụng json_schema với structured output
@@ -118,8 +117,7 @@ BẮT BUỘC: Luôn trả về JSON hợp lệ theo schema sau, không thiếu b
 Nếu không chắc giá trị, hãy trả về chuỗi `"Unknown"` hoặc mảng rỗng `[]`, KHÔNG được bỏ qua field.
 
 Trả lời bằng tiếng Việt, thân thiện và chuyên nghiệp.
-""")
-        
+""")        
         self.messages = [
             system_message,
             HumanMessage(content="Chào anh/chị! Em cần tư vấn công cụ công nghệ phù hợp."),
@@ -138,10 +136,10 @@ Câu hỏi: {question}
         try:
             # Gọi AI với structured output
             response = self.model.invoke(self.messages)
-            print("response là", response)
+            print("[TOOLS] 💡 Raw response:", response)
             # Validate và clean response
             validated_response = self._validate_response(response)
-            print("Validated response:", type(validated_response))
+            print("[TOOLS] ✅ Validated response:", type(validated_response))
             # Lưu conversation history
             summary = f"Đã tư vấn {len(validated_response['recommended_tools'])} công cụ cho: {question[:50]}..."
             self.messages.append(AIMessage(content=summary))
@@ -260,6 +258,9 @@ YÊU CẦU:
         except AttributeError:
             reply_text = str(resp)
 
+        # 
+        print("[CHAT] 💡 Response:", reply_text)
+
         # Lưu tiếp đoạn hội thoại này vào self.messages để lần sau còn nhớ
         self.messages.append(HumanMessage(content=question))
         self.messages.append(AIMessage(content=reply_text))
@@ -294,15 +295,6 @@ def get_consultation_summary():
     """Lấy tóm tắt cuộc tư vấn"""
     consultant = get_consultant()
     return consultant.get_conversation_summary()
-
-# Sample questions for testing
-SAMPLE_QUESTIONS = {
-    "web_dev": "Tôi muốn tạo website bán hàng online, budget 2-3 triệu",
-    "mobile_app": "Cần phát triển app mobile cho startup, có kinh nghiệm React",
-    "design": "Tôi là học sinh cần công cụ thiết kế poster và logo miễn phí",
-    "project_mgmt": "Team 5 người cần quản lý dự án phần mềm hiệu quả",
-    "data_analysis": "Phân tích dữ liệu bán hàng cho shop online nhỏ"
-}
 
 def handle_query(query):
     """Hàm tiện lợi để xử lý query và trả về dict"""
@@ -372,7 +364,7 @@ Assistant:
         text = str(resp).strip().upper()
 
     # Debug cho dễ theo dõi server log
-    print(f"[TYPE] Query: {query!r} -> Raw: {text!r}")
+    print(f"🧠 Request: {query!r} -> Type: {text!r}")
 
     # Nếu model trả đúng TOOLS thì coi là tìm công cụ
     if "TOOLS" in text:
@@ -397,3 +389,12 @@ def general_chat(query: str) -> str:
     """
     consultant = get_consultant()
     return consultant.general_chat_with_memory(query)
+
+# Sample questions for testing
+SAMPLE_QUESTIONS = {
+    "web_dev": "Tôi muốn tạo website bán hàng online, budget 2-3 triệu",
+    "mobile_app": "Cần phát triển app mobile cho startup, có kinh nghiệm React",
+    "design": "Tôi là học sinh cần công cụ thiết kế poster và logo miễn phí",
+    "project_mgmt": "Team 5 người cần quản lý dự án phần mềm hiệu quả",
+    "data_analysis": "Phân tích dữ liệu bán hàng cho shop online nhỏ"
+}

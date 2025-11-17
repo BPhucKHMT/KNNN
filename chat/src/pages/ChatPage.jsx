@@ -303,8 +303,7 @@ export default function ChatPage() {
               date: dateStr,
             },
           ]);
-
-          // Ở case này không cần scroll tới suggestion
+          requestAnimationFrame(() => scrollToBottom("smooth"));
           return;
         }
 
@@ -376,7 +375,6 @@ export default function ChatPage() {
           ...extra.map((m) => ({ ...m, date: dateStr })),
         ]);
 
-        // Chỉ scroll đặc biệt khi có suggestion row
         setShouldScrollToSuggestion(true);
       })
 
