@@ -1,2 +1,5 @@
 # Secret
 .env
+
+# Cache
+query_cache.db
