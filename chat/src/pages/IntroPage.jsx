@@ -47,7 +47,8 @@ export default function IntroPage() {
               </h2>
               <p className="text-base md:text-lg text-white/90 leading-7 max-w-xl mb-8">
                 <span className="font-semibold">ChatBot AI </span>
-                gợi ý công cụ học tập trên Internet cho dựa nhu cầu của sinh viên.
+                là một công cụ mạnh mẽ giúp sinh viên nhanh chóng tìm thấy các công cụ học tập trên Internet
+                phù hợp với nhu cầu của mình. Hãy thử ngay!
               </p>
 
               {/* Nút Bắt đầu */}

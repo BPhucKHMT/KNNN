@@ -19,7 +19,7 @@ function Header({ onBackToIntro, onReset, onScrollToBottom }) {
       <div className="max-w-screen-2xl mx-auto px-5 sm:px-8 py-5">
         <div className="relative flex items-center justify-center rounded-2xl border border-white/10 bg-black/20 backdrop-blur-xl px-5 py-3">
 
-          {/* Nút Back */}
+          {/* Button Back */}
           <button
             onClick={onBackToIntro}
             className="absolute left-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur flex items-center justify-center transition-all duration-300 hover:scale-110"
@@ -37,7 +37,7 @@ function Header({ onBackToIntro, onReset, onScrollToBottom }) {
             ChatBot AI gợi ý công cụ học tập
           </span>
 
-          {/* Nút Reset */}
+          {/* Button Reset */}
           <button
             onClick={onReset}
             className="absolute right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 backdrop-blur flex items-center justify-center transition-all duration-300 hover:scale-110"
@@ -54,20 +54,28 @@ function Header({ onBackToIntro, onReset, onScrollToBottom }) {
 
 /* Khối Welcome */
 function Welcome({ onExampleClick }) {
+  // Prompt minh họa
   const examples = [
     "Tôi muốn lên kế hoạch nội dung và đăng bài tự động",
     "Có app nào kết hợp lịch, việc và ghi chú không?",
     "Công cụ nào giúp tôi quản lý thời gian hiệu quả?",
   ];
   return (
-    <div className="rounded-2xl border border-white/10 bg-[#0f1218]/90 backdrop-blur p-5 sm:p-6">
-      <h2 className="text-2xl font-semibold mb-2 text-white">Xin chào bạn!</h2>
+    <div className="rounded-2xl p-5 sm:p-6">
+      {/* Logo + Xin chào */}
+      <div className="flex items-center justify-center gap-4 mb-2">
+        <img src="/src/assets/logo.png" alt="Logo" className="w-6 h-6 sm:w-8 sm:h-8" />
+        <h2 className="text-2xl font-semibold text-white">Xin chào bạn!</h2>
+      </div>
+      
+      {/* Mô tả */}
       <p className="text-sm text-white/80">
         Hãy đưa ra những yêu cầu trong học tập hay làm việc của bạn. 
         Mình sẽ đề xuất những công cụ hữu ích trên Internet, 
         kèm các bước hướng dẫn sử dụng, để đáp ứng nhu cầu của bạn.
       </p>
 
+      {/* Button prompt */}
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
         {examples.map((ex, i) => (
           <button
@@ -94,8 +102,8 @@ function getTodayLabel() {
 
 /* Trang chat chính */
 export default function ChatPage() {
-  const navigate = useNavigate();
-  const [messages, setMessages] = useState(() => {
+  const navigate = useNavigate(); // Điều hướng trang
+  const [messages, setMessages] = useState(() => { // Xem tin nhắn từ localStorage
     try {
       return JSON.parse(localStorage.getItem(LS_KEY)) || [];
     } catch {
@@ -103,17 +111,17 @@ export default function ChatPage() {
     }
   });
 
-  const [activeSuggestion, setActiveSuggestion] = useState(null);
-  const [prefillText, setPrefillText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errorText, setErrorText] = useState("");
+  const [activeSuggestion, setActiveSuggestion] = useState(null); // Tool đang mở modal
+  const [prefillText, setPrefillText] = useState(""); // Text gợi ý cho input
+  const [loading, setLoading] = useState(false); // Trạng thái bot trả lời
+  const [errorText, setErrorText] = useState(""); // Lỗi chung
   
-  const abortControllerRef = useRef(null);  // AbortController để hủy request
-  const scrollRef = useRef(null);
-  const hasMessages = useMemo(() => messages.length > 0, [messages]);
+  const abortControllerRef = useRef(null);  // Ref AbortController để hủy request
+  const scrollRef = useRef(null); // Ref vùng scroll chính
+  const hasMessages = useMemo(() => messages.length > 0, [messages]); // Có tin nhắn hay không
 
-  const suggestionAnchorRef = useRef(null);
-  const [shouldScrollToSuggestion, setShouldScrollToSuggestion] = useState(false);
+  const suggestionAnchorRef = useRef(null); // Ref khối gợi ý mới nhất
+  const [shouldScrollToSuggestion, setShouldScrollToSuggestion] = useState(false); // Có nên scroll đến khối gợi ý mới
 
   // Cuộn xuống cuối vùng chat
   function scrollToBottom(behavior = "smooth") {
@@ -165,6 +173,7 @@ export default function ChatPage() {
     };
   }, []);
 
+  // Hàm reset cuộc hội thoại
   function handleReset() {
     // Hủy request đang chạy (nếu có)
     if (abortControllerRef.current) {
@@ -179,6 +188,7 @@ export default function ChatPage() {
     setPrefillText("");
     setLoading(false);
     
+    // Xoá localStorage
     try {
       localStorage.removeItem(LS_KEY);
     } catch {
@@ -215,11 +225,8 @@ export default function ChatPage() {
 
   /* Map dữ liệu tool từ backend */
   function mapToolsForUI(tools = []) {
-    return tools.slice(0, 3).map((t) => {
-      const advantages = Array.isArray(t?.advantages) ? t.advantages : [];
-      const disadvantages = Array.isArray(t?.disadvantages) ? t.disadvantages : [];
-      const quickGuide = Array.isArray(t?.quick_guide) ? t.quick_guide : [];
-
+    return tools.slice(0, 3).map((t) => { // Chỉ lấy tối đa 3 tool
+       // Lấy Icon từ Google Favicon service
       const favicon = t?.url
         ? `https://t1.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${encodeURIComponent(
             t.url
@@ -227,15 +234,14 @@ export default function ChatPage() {
         : null;
 
       return {
-        title: t?.name || "Công cụ",
-        summary:
-          t?.description ||
-          (advantages.length ? advantages.join(" · ") : "Gợi ý công cụ phù hợp"),
+        title: t?.name || "Công cụ", // Tên tool
+        summary: // Mô tả ngắn
+          t?.description || null,
 
-        link: t?.url || null,
-        favicon,
+        link: t?.url || null, // Link công cụ
+        favicon, // Icon tool
 
-        details: {
+        details: { // Thông tin chi tiết
           overview: [
             t?.category && `- Nhóm: ${t.category}`,
             t?.pricing && `- Chi phí: ${t.pricing}`,
@@ -243,10 +249,10 @@ export default function ChatPage() {
             t?.difficulty_level && `- Độ khó: ${t.difficulty_level}`,
           ].filter(Boolean),
 
-          advantages: advantages.length ? advantages : null,
-          disadvantages: disadvantages.length ? disadvantages : null,
-          quickGuide: quickGuide.length ? quickGuide : null,
-          bestFor: t?.best_for || null,
+          advantages: t?.advantages || null, // Ưu điểm
+          disadvantages: t?.disadvantages || null, // Nhược điểm
+          quickGuide: t?.quick_guide || null, // Hướng dẫn nhanh
+          bestFor: t?.best_for || null, // Phù hợp nhất cho
         },
       };
     });
@@ -256,6 +262,7 @@ export default function ChatPage() {
   function addUserMessage(text) {
     if (!text || !text.trim()) return;
 
+    // Lấy thời gian hiện tại của user
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], {
       hour: "2-digit",
@@ -278,10 +285,10 @@ export default function ChatPage() {
     // Tạo AbortController mới để hủy request nếu cần
     abortControllerRef.current = new AbortController();
 
-    // Gọi backend
     setErrorText("");
     setLoading(true);
 
+    // Gọi BE
     askTools(text.trim(), abortControllerRef.current.signal)
       .then((data) => {
         // Case bot trả lời bình thường
@@ -319,7 +326,7 @@ export default function ChatPage() {
           extra.push({
             role: "assistant",
             type: "preface",
-            content: "So sánh nhanh giữa các lựa chọn:",
+            content: "**So sánh nhanh giữa các lựa chọn:**",
           });
           extra.push({
             role: "assistant",
@@ -336,7 +343,7 @@ export default function ChatPage() {
           extra.push({
             role: "assistant",
             type: "preface",
-            content: "Kết luận nhanh:",
+            content: "**Kết luận nhanh:**",
           });
           extra.push({
             role: "assistant",
@@ -348,7 +355,7 @@ export default function ChatPage() {
           extra.push({
             role: "assistant",
             type: "preface",
-            content: "Các bước tiếp theo bạn có thể làm:",
+            content: "**Các bước tiếp theo bạn có thể làm:**",
           });
           extra.push({
             role: "assistant",
@@ -379,7 +386,6 @@ export default function ChatPage() {
       })
 
       .catch((err) => {
-        // Kiểm tra nếu là abort thì không hiện lỗi
         if (err.name === 'AbortError') {
           console.log('Request đã bị hủy');
           return;
@@ -404,7 +410,6 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-dvh flex flex-col bg-[#0b0f16] text-white">
-      {/* Nền radial nhẹ giống IntroPage */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(120%_120%_at_0%_100%,rgba(236,72,153,0.18)_0%,transparent_55%)]"

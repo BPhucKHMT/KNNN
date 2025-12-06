@@ -233,7 +233,7 @@ BỐI CẢNH:
 
 YÊU CẦU:
 - Trả lời ngắn gọn, rõ ràng, bám sát câu hỏi hiện tại.
-- Không trả về JSON, không dùng Markdown, chỉ là văn bản thuần.
+- Không trả về JSON, chỉ là văn bản thuần.
 - Không cần nhắc lại toàn bộ lịch sử, chỉ liên hệ khi thực sự cần thiết.
 """)
 
@@ -364,7 +364,7 @@ Assistant:
         text = str(resp).strip().upper()
 
     # Debug cho dễ theo dõi server log
-    print(f"🧠 Request: {query!r} -> Type: {text!r}")
+    print(f"❔ Request: {query!r} -> Type: {text!r}")
 
     # Nếu model trả đúng TOOLS thì coi là tìm công cụ
     if "TOOLS" in text:
