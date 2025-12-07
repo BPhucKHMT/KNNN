@@ -41,7 +41,7 @@ frontend/
 ```
 ### Chạy FE
 - Cài đặt nodejs và npm
-- Cài đặt thư viện react cho fe
+- Cài đặt thư viện react cần thiết cho fe
 ```bash
 npm install
 npm install lucide-react
