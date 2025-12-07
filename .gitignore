@@ -1,8 +1,11 @@
 # Secret
 .env
 
-# Cache
+# SQLite Cache
 query_cache.db
 
-# IDE directories
+# Webstorm IDE
 .idea/
+
+# Python ignore
+__pycache__/

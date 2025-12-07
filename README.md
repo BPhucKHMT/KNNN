@@ -7,11 +7,12 @@ Chatbot AI tìm kiếm và so sánh công cụ trên Internet theo nhu cầu cô
 frontend/
 ├── src/
 │   ├── components/                     # Các component dùng chung
-│   │   ├── ChatMessage.jsx             # Hiển thị bong bóng chat (user/bot)
 │   │   ├── Header.jsx                  # Header chung cho Intro + About + Support
+│   │   ├── ChatMessage.jsx             # Hiển thị bong bóng chat (user/bot)
 │   │   ├── MessageInput.jsx            # Ô nhập tin nhắn + nút gửi
 │   │   ├── Modal.jsx                   # Popup chi tiết công cụ
-│   │   └── SuggestionCard.jsx          # Card gợi ý công cụ
+│   │   ├── SuggestionCard.jsx          # Card gợi ý công cụ
+│   │   └── ComparisonTable.jsx         # Bảng so sánh công cụ
 │   │
 │   ├── pages/                          # Các trang chính của ứng dụng
 │   │   ├── IntroPage.jsx               # Trang bắt đầu
@@ -47,6 +48,7 @@ npm install
 npm install lucide-react
 npm install framer-motion
 npm install react-router-dom
+npm install react-markdown
 ```
 - Chạy giao diện fe
 ```bash
