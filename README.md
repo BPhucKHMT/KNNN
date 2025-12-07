@@ -1,10 +1,6 @@
 # Kĩ năng nghề nghiệp
-## Feedback
-- Góp ý về trang Intro
-- Góp ý về trang About
-- Góp ý về trang Support
-- Góp ý về trang Chat
-- Bug report
+Cẩm nang số thông minh - Hướng dẫn sử dụng công nghệ đúng mục đích.
+Chatbot AI tìm kiếm và so sánh công cụ trên Internet theo nhu cầu công việc và học tập của sinh viên.
 ## Frontend (React + Vite + Tailwind CSS)
 ### Cấu trúc FE
 ```bash
